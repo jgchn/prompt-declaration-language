@@ -10,21 +10,6 @@ on: [push, pull_request]
 #   workflow_dispatch:
 
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Install Ollama
-  #       uses: actions/checkout@v2
-  #     - name: Install Ollama
-  #       run: |
-  #         curl -fsSL https://ollama.com/install.sh | sh
-  #     - name: Set Environment Variables
-  #       run: |
-  #         echo "OLLAMA_HOST=0.0.0.0" >> $GITHUB_ENV
-  #     - name: Serve an ollama model
-  #       run: |
-  #         ollama run granite-code:8b
-
   tests:
     name: Exeution tests
     runs-on: ubuntu-latest
@@ -46,11 +31,12 @@ jobs:
     - name: Set Environment Variables
       run: |
         echo "OLLAMA_HOST=0.0.0.0" >> $GITHUB_ENV
-    - name: Serve an ollama model
+    - name: Serve a granite-code
       run: |
-        ollama run granite-code:8b
-
-
+        ollama pull granite-code:8b
+        ollama pull granite3-dense:8b
+        ollama pull mxbai-embed-large
+        ollama serve
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
