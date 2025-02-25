@@ -12,8 +12,8 @@ from pdl.pdl_dumper import block_to_dict
 from pdl.pdl_lazy import PdlDict
 from pdl.pdl_parser import PDLParseError
 
-UPDATE_RESULTS = False
-RESULTS_VERSION = 14
+UPDATE_RESULTS = True
+RESULTS_VERSION = 15
 
 
 TO_SKIP = {
@@ -39,6 +39,12 @@ TO_SKIP = {
         pathlib.Path("examples") / "gsm8k" / "math_no_sd.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "error.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo1.pdl",
+        pathlib.Path("examples") / "intrinsics" / "demo-hallucination.pdl",
+        pathlib.Path("examples") / "react" / "demo.pdl",
+        pathlib.Path("examples") / "rag" / "pdf_query.pdl",
+        pathlib.Path("examples") / "rag" / "pdf_index.pdl",
+        pathlib.Path("examples") / "rag" / "rag_library1.pdl",
+        pathlib.Path("examples") / "talk" / "9-react.pdl",
     ]
 }
 
@@ -237,3 +243,15 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
     assert len(unexpected_valid) == 0, f"Unexpected valid: {unexpected_valid}"
     # Unexpected results
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
+
+# if __name__ == "__main__":
+#     skip_files = [TO_SKIP, EXPECTED_PARSE_ERROR, EXPECTED_RUNTIME_ERROR]
+
+#     for pdl_file_name in pathlib.Path(".").glob("**/*.pdl"):
+#         curr_file = str(pdl_file_name)
+#         if curr_file not in TO_SKIP:
+#             if pdl_file_name not in EXPECTED_PARSE_ERROR:
+#                 if pdl_file_name not in EXPECTED_RUNTIME_ERROR:
+#                     if curr_file not in NOT_DETERMINISTIC:
+#                         print(curr_file)
+

@@ -63,16 +63,16 @@ text:
 - repeat:
     text:
     - def: thought
-      model: replicate/ibm-granite/granite-3.1-8b-instruct
+      model: ollama/granite3.1-dense
       parameters:
         stop_sequences: "Action:"
     - "Action:\n"
     - def: action
-      model: replicate/ibm-granite/granite-3.1-8b-instruct
+      model: ollama/granite3.1-dense
       parameters:
         stop_sequences: "\n"
       parser: json
-    - match: ${ action[0].name }
+    - match: ${ action[0]["name"] }
       with:
         - case: 'Search'
           then:

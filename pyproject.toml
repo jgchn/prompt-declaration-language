@@ -76,3 +76,8 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 pdl = ["pdl-schema.json"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src",
+]

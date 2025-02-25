@@ -1,0 +1,28 @@
+Merge sort is a divide-and-conquer algorithm that recursively divides an array into two halves and sorts them separately. The sorted halves are then merged back together to form the final sorted array. Here's how you can implement merge sort in Python:
+```python
+def merge_sort(arr):
+ if len(arr) <= 1:
+ return arr
+ mid = len(arr) // 2
+ left = arr[:mid]
+ right = arr[mid:]
+ left_sorted = merge_sort(left)
+ right_sorted = merge_sort(right)
+ return merge(left_sorted, right_sorted)
+ 
+def merge(left, right):
+ result = []
+ i, j = 0, 0
+ while i < len(left) and j < len(right):
+ if left[i] <= right[j]:
+ result.append(left[i])
+ i += 1
+ else:
+ result.append(right[j])
+ j += 1
+ result += left[i:]
+ result += right[j:]
+ return result
+```
+The `merge_sort` function recursively divides the input array into two halves and sorts them separately using the `merge` function. The `merge` function merges two sorted arrays by comparing the elements at corresponding indices and placing the smaller element in the result array. The resulting array is then returned.
+
