@@ -36,7 +36,6 @@ jobs:
         ollama pull granite-code:8b
         ollama pull granite3-dense:8b
         ollama pull mxbai-embed-large
-        ollama serve
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
