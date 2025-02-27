@@ -1,15 +1,27 @@
 ---
 name: Run examples
 
-on:
-  schedule:
-    - cron:  '0 1 * * *'
-  workflow_dispatch:
+# on:
+#   schedule:
+#     - cron:  '0 1 * * *'
+#   workflow_dispatch:
+
+## TODO: for now
+on: [push, pull_request]
 
 jobs:
+  ollama:
+    permissions:
+      contents: read
+    uses: actions/checkout@v2
+    with:
+      action: .github/actions/ollama-setup
+
   tests:
     name: Execution tests
     runs-on: ubuntu-latest
+    needs:
+      - ollama
     strategy:
       fail-fast: false
       matrix:

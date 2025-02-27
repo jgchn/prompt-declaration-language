@@ -98,6 +98,13 @@ TO_SKIP = {
         / "rag_library1.pdl",  # (This is glue to Python, it doesn't "run" alone)
         pathlib.Path("pdl-live-react") / "demos" / "error.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo1.pdl",
+
+        # For now, skip the granite-io examples
+        pathlib.Path("examples") / "granite-io" / "granite_io_hallucinations.pdl",
+        pathlib.Path("examples") / "granite-io" / "granite_io_openai.pdl",
+        pathlib.Path("examples") / "granite-io" / "granite_io_thinking.pdl",
+        pathlib.Path("examples") / "granite-io" / "granite_io_transformers.pdl",
+        pathlib.Path("examples") / "hello" / "hello-graniteio.pdl",
     ]
 }
 
