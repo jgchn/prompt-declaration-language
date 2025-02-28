@@ -50,7 +50,6 @@ from .pdl_ast import (  # noqa: E402
     ExpressionType,
     FunctionBlock,
     GetBlock,
-    GraniteioIntrinsicType,
     GraniteioModelBlock,
     IfBlock,
     ImportBlock,
@@ -87,7 +86,6 @@ from .pdl_ast import (  # noqa: E402
     TextBlock,
     Timing,
     empty_block_location,
-    graniteio_intrinsic_type_adapter,
 )
 from .pdl_dumper import block_to_dict  # noqa: E402
 from .pdl_lazy import PdlConst, PdlDict, PdlLazy, PdlList, lazy_apply  # noqa: E402
@@ -546,17 +544,14 @@ def process_block_body(
                 object_trace = dict(zip(block.object.keys(), values_trace))
                 trace = block.model_copy(update={"object": object_trace})
             else:
-                objects, background, scope, trace = process_blocks_of(
+                result, background, scope, trace = process_blocks_of(
                     block,
                     "object",
-                    IterationType.ARRAY,
+                    IterationType.OBJECT,
                     iteration_state,
                     scope,
                     loc,
                 )
-                result = PdlDict({})
-                for d in objects.data:
-                    result = result | d
             if state.yield_result and not iteration_state.yield_result:
                 yield_result(result, block.kind)
         case MessageBlock():
@@ -961,7 +956,8 @@ def process_blocks(  # pylint: disable=too-many-arguments,too-many-positional-ar
     if not isinstance(blocks, str) and isinstance(blocks, Sequence):
         # Is a list of blocks
         iteration_state = state.with_yield_result(
-            state.yield_result and iteration_type != IterationType.ARRAY
+            state.yield_result
+            and (iteration_type in (IterationType.LASTOF, IterationType.TEXT))
         )
         new_loc = None
         background = PdlList([])
@@ -1010,6 +1006,10 @@ def combine_results(iteration_type: IterationType, results: list[PdlLazy[Any]]):
     match iteration_type:
         case IterationType.ARRAY:
             result = PdlList(results)
+        case IterationType.OBJECT:
+            result = PdlDict({})
+            for d in results:
+                result = result | d
         case IterationType.LASTOF:
             if len(results) > 0:
                 result = results[-1]
@@ -1224,15 +1224,11 @@ def process_call_model(
                     scope.get("pdl_model_default_parameters", []),
                 )
         case GraniteioModelBlock():
-            _, concrete_block = process_expr_of(
-                concrete_block, "intrinsics", scope, loc
-            )
-            concrete_block.intrinsics = [
-                graniteio_intrinsic_type_adapter.validate_python(i)
-                for i in concrete_block.intrinsics
-            ]
             _, concrete_block = process_expr_of(concrete_block, "backend", scope, loc)
             _, concrete_block = process_expr_of(concrete_block, "processor", scope, loc)
+            _, concrete_block = process_expr_of(
+                concrete_block, "parameters", scope, loc
+            )
         case _:
             assert False
     # evaluate input
@@ -1382,24 +1378,18 @@ def litellm_parameters_to_dict(
     return parameters_dict
 
 
-def granite_intrinsics_to_list(
-    intrinsics: ExpressionType[list[GraniteioIntrinsicType]],
-) -> list[GraniteioIntrinsicType]:
-    assert isinstance(intrinsics, list)  # block is a "concrete block"
-    return intrinsics
-
-
 def generate_client_response_single(
     state: InterpreterState,
     block: LitellmModelBlock | GraniteioModelBlock,
     model_input: ModelInput,
 ) -> tuple[LazyMessage, PdlLazy[Any]]:
+    assert block.parameters is None or isinstance(
+        block.parameters, dict
+    )  # block is a "concrete block"
     match block:
         case LitellmModelBlock():
             assert isinstance(block.model, str)  # block is a "concrete block"
-            assert block.parameters is None or isinstance(
-                block.parameters, dict
-            )  # block is a "concrete block"
+
             message, response = LitellmModel.generate_text(
                 block=block,
                 messages=model_input,
@@ -1409,7 +1399,6 @@ def generate_client_response_single(
             message, response = GraniteioModel.generate_text(
                 block=block,
                 messages=model_input,
-                intrinsics=granite_intrinsics_to_list(block.intrinsics),
             )
         case _:
             assert False

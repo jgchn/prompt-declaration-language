@@ -23,8 +23,6 @@ from .pdl_ast import (
     IfBlock,
     ImportBlock,
     IncludeBlock,
-    JoinArray,
-    JoinLastOf,
     JoinText,
     JoinType,
     LastOfBlock,
@@ -127,17 +125,14 @@ def block_to_dict(  # noqa: C901
             if block.modelResponse is not None:
                 d["modelResponse"] = block.modelResponse
         case GraniteioModelBlock():
-            d["platform"] = str(block.platform)
             d["model"] = block.model
+            d["platform"] = str(block.platform)
+            d["backend"] = block.backend
+            d["processor"] = block.processor
             if block.input is not None:
                 d["input"] = block_to_dict(block.input, json_compatible)
-            if block.intrinsics is not None:
-                if isinstance(block.intrinsics, GraniteioModelBlock):
-                    d["intrinsics"] = block.intrinsics.model_dump(
-                        exclude_unset=True, exclude_defaults=True
-                    )
-                else:
-                    d["intrinsics"] = block.intrinsics
+            if block.parameters is not None:
+                d["parameters"] = block.parameters
             if block.modelResponse is not None:
                 d["modelResponse"] = block.modelResponse
         case CodeBlock():
@@ -178,7 +173,7 @@ def block_to_dict(  # noqa: C901
             if block.trace:
                 d["trace"] = block_to_dict(block.trace, json_compatible)
         case ImportBlock():
-            d["imports"] = block.imports
+            d["import"] = block.imports
             if block.trace:
                 d["trace"] = block_to_dict(block.trace, json_compatible)
         case IfBlock():
@@ -290,7 +285,7 @@ def join_to_dict(join: JoinType) -> dict[str, Any]:
     match join:
         case JoinText():
             d["with"] = join.join_string
-        case JoinArray() | JoinLastOf():
+        case _:
             d["as"] = str(join.iteration_type)
     return d
 
