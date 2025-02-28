@@ -1,4 +1,6 @@
-description: Simple LLM interaction
+description: Model chaining
 text:
 - "write a hello world example, and explain to me how to run it"
+- model: ollama/granite3.2:8b
+- "how about in Rust?"
 - model: ollama/granite3.2:8b
