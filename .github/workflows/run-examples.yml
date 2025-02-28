@@ -55,14 +55,25 @@ jobs:
         ollama pull granite3-dense:8b
         ollama pull granite3.1-dense
         ollama pull mxbai-embed-large
+        ollama list
 
     - name: Check that all required models are available
       shell: bash
       run: |
-        ollama list | grep -q "ollama/granite-code" || exit 1
-        ollama list | grep -q "ollama/granite3-dense:8b" || exit 1
-        ollama list | grep -q "ollama/granite3.1-dense" || exit 1
-        ollama list | grep -q "mxbai-embed-large" || exit 1
+        models=("granite-code" "granite3-dense" "granite3.1-dense" "mxbai-embed-large" "mxbai-embed-large")
+        missing=0
+        for model in "${models[@]}"; do
+          if ! ollama list | awk 'NR>1 {print $1}' | grep -q "$model"; then
+            echo "❌ Model $model (or substring) is missing!"
+            missing=1
+          fi
+        done
+
+        if [ "$missing" -eq 1 ]; then
+          exit 1
+        else
+          echo "✅ All expected models are available."
+        fi
 
     - name: Wait for Ollama server
       shell: bash
