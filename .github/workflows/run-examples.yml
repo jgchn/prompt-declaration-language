@@ -21,6 +21,7 @@ jobs:
       - name: Pull models in examples/
         shell: bash
         run: |
+          ollama serve &
           ollama pull granite-code:8b
           ollama pull granite3-dense:8b
           ollama pull granite3.1-dense:8b
