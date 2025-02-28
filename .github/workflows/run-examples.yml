@@ -39,7 +39,7 @@ jobs:
     - name: Check that all required models are available
       shell: bash
       run: |
-        models=("granite-code" "granite3-dense" "granite3.1-dense" "mxbai-embed-large" "mxbai-embed-large" "granite3.2" "granite3.2:8b")
+        models=("granite-code" "granite3-dense" "granite3.1-dense" "mxbai-embed-large" "granite3.2" "granite3.2:8b")
         missing=0
         for model in "${models[@]}"; do
           if ! ollama list | awk 'NR>1 {print $1}' | grep -q "$model"; then
