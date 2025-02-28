@@ -10,40 +10,60 @@ name: Run examples
 on: [push, pull_request]
 
 jobs:
-  ollama:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Ollama and start server
-        shell: bash
-        run: |
-          curl -fsSL https://ollama.com/install.sh | sudo -E sh
+  # ollama:
+  #   runs-on: ubuntu-latest
+  #   steps:
+      # - name: Install Ollama and start server
+      #   shell: bash
+      #   run: |
+      #     curl -fsSL https://ollama.com/install.sh | sudo -E sh
 
-      - name: Pull models in examples/
-        shell: bash
-        run: |
-          ollama serve &
-          ollama pull granite-code:8b
-          ollama pull granite3-dense:8b
-          ollama pull granite3.1-dense:8b
-          ollama pull mxbai-embed-large
+      # - name: Pull models in examples/
+      #   shell: bash
+      #   run: |
+      #     ollama serve &
+      #     ollama pull granite-code:8b
+      #     ollama pull granite3-dense:8b
+      #     ollama pull granite3.1-dense:8b
+      #     ollama pull mxbai-embed-large
 
-      - name: Wait for Ollama server
-        shell: bash
-        run: |
-          sleep 10
-          time curl -i http://localhost:11434
+      # - name: Wait for Ollama server
+      #   shell: bash
+      #   run: |
+      #     sleep 10
+      #     time curl -i http://localhost:11434
 
   tests:
     name: Execution tests
     runs-on: ubuntu-latest
-    needs:
-      - ollama
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.11', '3.12', '3.13']
 
     steps:
+      # Set up ollama
+    - name: Install Ollama and start server
+      shell: bash
+      run: |
+        curl -fsSL https://ollama.com/install.sh | sudo -E sh
+
+    - name: Pull models in examples/
+      shell: bash
+      run: |
+        ollama serve &
+        ollama pull granite-code:8b
+        ollama pull granite3-dense:8b
+        ollama pull granite3.1-dense:8b
+        ollama pull mxbai-embed-large
+
+    - name: Wait for Ollama server
+      shell: bash
+      run: |
+        sleep 10
+        time curl -i http://localhost:11434
+
+    # Run tests
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
