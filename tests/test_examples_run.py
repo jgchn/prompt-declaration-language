@@ -18,7 +18,6 @@ from pdl.pdl_parser import PDLParseError
 UPDATE_RESULTS = False
 RESULTS_VERSION = 15
 
-
 TO_SKIP = {
     str(name)
     for name in [
