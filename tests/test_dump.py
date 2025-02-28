@@ -20,7 +20,7 @@ def has_include(block: BlockType) -> bool:
     return b
 
 
-def test_ast_iterators() -> None:
+def test_dump() -> None:
     for yaml_file_name in pathlib.Path(".").glob("**/*.pdl"):
         try:
             ast1, _ = parse_file(yaml_file_name)
@@ -31,6 +31,8 @@ def test_ast_iterators() -> None:
             ast2, _ = parse_str(s)
             json1 = ast1.model_dump_json()
             json2 = ast2.model_dump_json()
-            assert json1 == json2, yaml_file_name
+            assert json1 == json2, f"{yaml_file_name}:\n{s}"
         except PDLParseError:
             pass
+        except Exception as exc:
+            assert False, f"{yaml_file_name}: {repr(exc)}"

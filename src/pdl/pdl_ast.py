@@ -14,7 +14,7 @@ from typing import (
     Union,
 )
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 from pydantic.json_schema import SkipJsonSchema
 
 from .pdl_lazy import PdlDict, PdlLazy
@@ -348,54 +348,14 @@ class LitellmModelBlock(ModelBlock):
     parameters: Optional[LitellmParameters | ExpressionType[dict]] = None
 
 
-class GraniteioIntrinsic(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-
-class GraniteioIntrinsicHallucinations(GraniteioIntrinsic):
-    hallucinations: bool = True
-
-
-class GraniteioIntrinsicCitations(GraniteioIntrinsic):
-    citations: bool = True
-
-
-class GraniteioIntrinsicLength(GraniteioIntrinsic):
-    length: str
-
-
-class GraniteioIntrinsicOriginality(GraniteioIntrinsic):
-    originality: str
-
-
-class GraniteioIntrinsicThinking(GraniteioIntrinsic):
-    thinking: bool = True
-
-
-class GraniteioIntrinsicDocuments(GraniteioIntrinsic):
-    documents: list
-
-
-GraniteioIntrinsicType: TypeAlias = (
-    Literal["hallucinations", "citations", "thinking"]
-    | GraniteioIntrinsicHallucinations
-    | GraniteioIntrinsicCitations
-    | GraniteioIntrinsicLength
-    | GraniteioIntrinsicOriginality
-    | GraniteioIntrinsicDocuments
-)
-
-graniteio_intrinsic_type_adapter = TypeAdapter(GraniteioIntrinsicType)
-
-
 class GraniteioModelBlock(ModelBlock):
     """Call a LLM through the granite-io API."""
 
     model: ExpressionType[object]
     platform: Literal[ModelPlatform.GRANITEIO] = ModelPlatform.GRANITEIO
-    intrinsics: ExpressionType | list[GraniteioIntrinsicType] = []
     backend: ExpressionType[str | dict[str, Any]]
     processor: Optional[ExpressionType[str]] = None
+    parameters: Optional[ExpressionType[dict[str, Any]]] = None
 
 
 class CodeBlock(Block):
@@ -517,6 +477,7 @@ class MatchBlock(Block):
 class IterationType(StrEnum):
     LASTOF = "lastOf"
     ARRAY = "array"
+    OBJECT = "object"
     TEXT = "text"
 
 
@@ -544,13 +505,19 @@ class JoinArray(JoinConfig):
     """
 
 
+class JoinObject(JoinConfig):
+    iteration_type: Literal[IterationType.OBJECT] = Field(alias="as")
+    """Return the union of the objects created at each iteration.
+    """
+
+
 class JoinLastOf(JoinConfig):
     iteration_type: Literal[IterationType.LASTOF] = Field(alias="as")
     """Return the result of the last iteration.
     """
 
 
-JoinType: TypeAlias = JoinText | JoinArray | JoinLastOf
+JoinType: TypeAlias = JoinText | JoinArray | JoinObject | JoinLastOf
 
 
 class RepeatBlock(Block):
