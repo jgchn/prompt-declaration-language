@@ -55,7 +55,6 @@ jobs:
         ollama pull granite3-dense:8b
         ollama pull granite3.1-dense
         ollama pull mxbai-embed-large
-        ollama serve
 
     - name: Check that all required models are available
       shell: bash
