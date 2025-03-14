@@ -15,22 +15,17 @@ from pdl.pdl_parser import PDLParseError
 # test_examples_run.py runs the examples and compares the results
 # to the expected results in tests/results/examples
 
-UPDATE_RESULTS = True
-RESULTS_VERSION = 1
+UPDATE_RESULTS = False
+RESULTS_VERSION = 0
 
 TO_SKIP = {
     str(name)
     for name in [
-
         # Requires dataset dependency
         pathlib.Path("examples") / "cldk" / "cldk-assistant.pdl",
         pathlib.Path("examples") / "gsm8k" / "gsm8.pdl",
-
         # Requires installation dependencies
-        pathlib.Path("examples")
-        / "intrinsics"
-        / "demo-hallucination.pdl",
-
+        pathlib.Path("examples") / "intrinsics" / "demo-hallucination.pdl",
         # Skip RAG examples
         pathlib.Path("examples")
         / "rag"
@@ -44,20 +39,16 @@ TO_SKIP = {
         pathlib.Path("examples")
         / "rag"
         / "tfidf_rag.pdl",  # TODO: check what the expected output is
-
         # RAG examples sometimes work and sometimes don't
         pathlib.Path("examples") / "talk" / "9-react.pdl",
-
         # Not sure (code error)
         pathlib.Path("examples") / "callback" / "repair_prompt.pdl",
         pathlib.Path("examples") / "react" / "react_call.pdl",
-
         # Skip UI examples
         pathlib.Path("pdl-live-react") / "demos" / "error.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo1.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo2.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "*.pdl",
-
         # Skip the granite-io examples
         pathlib.Path("examples") / "granite-io" / "granite_io_hallucinations.pdl",
         pathlib.Path("examples") / "granite-io" / "granite_io_openai.pdl",
@@ -67,7 +58,8 @@ TO_SKIP = {
     ]
 }
 
-NOT_DETERMINISTIC = {}
+NOT_DETERMINISTIC: dict[str, str] = {}
+
 
 @dataclass
 class InputsType:
@@ -157,13 +149,16 @@ EXPECTED_RUNTIME_ERROR = [
     pathlib.Path("tests") / "data" / "line" / "hello9.pdl",
 ]
 
+
 def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
     actual_parse_error: set[str] = set()
     actual_runtime_error: set[str] = set()
     wrong_results = {}
 
     for pdl_file_name in pathlib.Path(".").glob("**/*.pdl"):
-        scope: ScopeType = {"pdl_model_default_parameters": get_default_model_parameters()}
+        scope: ScopeType = PdlDict(
+            {"pdl_model_default_parameters": get_default_model_parameters()}
+        )
 
         # Skip test on certain examples
         if str(pdl_file_name) in TO_SKIP:
@@ -192,10 +187,6 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             result_dir_name = (
                 pathlib.Path(".") / "tests" / "results" / pdl_file_name.parent
             )
-
-            # TODO(jing): delete this section
-            # if str(pdl_file_name) in NOT_DETERMINISTIC:
-            #     continue
 
             # If result is wrong, update to a new file
             wrong_result = True
@@ -254,5 +245,5 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
     )
     assert len(unexpected_valid) == 0, f"Unexpected valid: {unexpected_valid}"
 
-    # Assert no files produce inexpected output
+    # Assert no files produce unexpected output
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
