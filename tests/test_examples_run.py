@@ -148,12 +148,14 @@ EXPECTED_RUNTIME_ERROR = [
     pathlib.Path("tests") / "data" / "line" / "hello9.pdl",
 ]
 
+
 def _get_result_dir_name(pdl_file_name: pathlib.Path):
     """
     Returns the results directory name for the pdl file
     """
 
     return pathlib.Path(".") / "tests" / "results" / pdl_file_name.parent
+
 
 def _update_result(pdl_file_name: pathlib.Path, result):
     """
@@ -162,9 +164,7 @@ def _update_result(pdl_file_name: pathlib.Path, result):
 
     result_dir_name = _get_result_dir_name(pdl_file_name)
 
-    result_file_name_0 = (
-        pdl_file_name.stem + "." + str(RESULTS_VERSION) + ".result"
-    )
+    result_file_name_0 = pdl_file_name.stem + "." + str(RESULTS_VERSION) + ".result"
     result_dir_name.mkdir(parents=True, exist_ok=True)
 
     with open(
@@ -174,6 +174,7 @@ def _update_result(pdl_file_name: pathlib.Path, result):
 
 
 def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
+    random.seed(11)
     actual_parse_error: set[str] = set()
     actual_runtime_error: set[str] = set()
     wrong_results = {}
@@ -196,9 +197,8 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
                     io.StringIO(inputs.stdin),
                 )
             if inputs.scope is not None:
-                scope = inputs.scope
+                scope = scope | inputs.scope
         try:
-            random.seed(11)
             output = pdl.exec_file(
                 pdl_file_name,
                 scope=scope,
@@ -262,57 +262,56 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
     # Assert no files produce unexpected output
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
 
+
 def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     """
     Utility function for testing and updating result for one program.
     Set to method to public when running pytest
     """
-
-    pdl_file_name = pathlib.Path("examples") / "folder" / "pdl_program.pdl"
-
     random.seed(11)
+    pdl_file_name = pathlib.Path("examples") / "hello" / "hello.pdl"
     output = pdl.exec_file(
         pdl_file_name,
-        scope=PdlDict(
-            {"pdl_model_default_parameters": get_default_model_parameters()}
-        ),
-        output='all',
-        config=pdl.InterpreterConfig(batch=0)
-        )
+        scope=PdlDict({"pdl_model_default_parameters": get_default_model_parameters()}),
+        output="all",
+        config=pdl.InterpreterConfig(batch=0),
+    )
 
     # Write result
-    result = output['result']
+    result = output["result"]
     block_to_dict(output["trace"], json_compatible=True)
     _update_result(pdl_file_name, result)
 
 
-def __test_get_single_program_with_input_result(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
-    """
-    Utility function for testing and updating result for one program with user input.
-    Set to method to public when running pytest
-    """
+# def __test_get_single_program_with_input_result(
+#     capsys: CaptureFixture[str], monkeypatch: MonkeyPatch
+# ) -> None:
+#     """
+#     Utility function for testing and updating result for one program with user input.
+#     Set to method to public when running pytest
+#     """
 
-    pdl_file_name = pathlib.Path("examples") / "folder" / "pdl_program.pdl"
-    inputs = InputsType(stdin="Your Input\n")
+#     random.seed(11)
+#     pdl_file_name = pathlib.Path("examples") / "chatbot" / "chatbot.pdl"
+#     inputs = InputsType(stdin="What is APR?\nyes\n")
+#     scope = PdlDict({})
 
-    # Set input scope
-    if inputs.stdin is not None:
-        monkeypatch.setattr(
-            "sys.stdin",
-            io.StringIO(inputs.stdin),
-        )
-    if inputs.scope is not None:
-        scope = inputs.scope
+#     # Set input scope
+#     if inputs.stdin is not None:
+#         monkeypatch.setattr(
+#             "sys.stdin",
+#             io.StringIO(inputs.stdin),
+#         )
+#     if inputs.scope is not None:
+#         scope = inputs.scope
+#         if "pdl_model_default_parameters" not in scope:
+#             scope["pdl_model_default_parameters"] = get_default_model_parameters()
 
-    random.seed(11)
-    output = pdl.exec_file(
-        pdl_file_name,
-        scope=scope,
-        output='all',
-        config=pdl.InterpreterConfig(batch=0)
-        )
+#     output = pdl.exec_file(
+#         pdl_file_name, scope=scope, output="all", config=pdl.InterpreterConfig(batch=0)
+#     )
 
-    # Write result
-    result = output['result']
-    block_to_dict(output["trace"], json_compatible=True)
-    _update_result(pdl_file_name, result)
+#     # Write result
+#     result = output["result"]
+#     block_to_dict(output["trace"], json_compatible=True)
+#     _update_result(pdl_file_name, result)
