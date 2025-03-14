@@ -107,7 +107,6 @@ TESTS_WITH_INPUT: dict[str, InputsType] = {
     }.items()
 }
 
-
 EXPECTED_PARSE_ERROR = [
     pathlib.Path("tests") / "data" / "line" / "hello.pdl",
     pathlib.Path("tests") / "data" / "line" / "hello1.pdl",
@@ -149,6 +148,30 @@ EXPECTED_RUNTIME_ERROR = [
     pathlib.Path("tests") / "data" / "line" / "hello9.pdl",
 ]
 
+def _get_result_dir_name(pdl_file_name: pathlib.Path):
+    """
+    Returns the results directory name for the pdl file
+    """
+
+    return pathlib.Path(".") / "tests" / "results" / pdl_file_name.parent
+
+def _update_result(pdl_file_name: pathlib.Path, result):
+    """
+    Updates result file
+    """
+
+    result_dir_name = _get_result_dir_name(pdl_file_name)
+
+    result_file_name_0 = (
+        pdl_file_name.stem + "." + str(RESULTS_VERSION) + ".result"
+    )
+    result_dir_name.mkdir(parents=True, exist_ok=True)
+
+    with open(
+        result_dir_name / result_file_name_0, "w", encoding="utf-8"
+    ) as result_file:
+        result_file.write(str(result))
+
 
 def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
     actual_parse_error: set[str] = set()
@@ -184,9 +207,7 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             )
             result = output["result"]
             block_to_dict(output["trace"], json_compatible=True)
-            result_dir_name = (
-                pathlib.Path(".") / "tests" / "results" / pdl_file_name.parent
-            )
+            result_dir_name = _get_result_dir_name(pdl_file_name)
 
             # If result is wrong, update to a new file
             wrong_result = True
@@ -200,14 +221,7 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
                     break
             if wrong_result:
                 if UPDATE_RESULTS:
-                    result_file_name_0 = (
-                        pdl_file_name.stem + "." + str(RESULTS_VERSION) + ".result"
-                    )
-                    result_dir_name.mkdir(parents=True, exist_ok=True)
-                    with open(
-                        result_dir_name / result_file_name_0, "w", encoding="utf-8"
-                    ) as result_file:
-                        print(str(result), file=result_file)
+                    _update_result(pdl_file_name, result)
                 wrong_results[str(pdl_file_name)] = {
                     "actual": str(result),
                 }
@@ -247,3 +261,58 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
 
     # Assert no files produce unexpected output
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
+
+def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
+    """
+    Utility function for testing and updating result for one program.
+    Set to method to public when running pytest
+    """
+
+    pdl_file_name = pathlib.Path("examples") / "folder" / "pdl_program.pdl"
+
+    random.seed(11)
+    output = pdl.exec_file(
+        pdl_file_name,
+        scope=PdlDict(
+            {"pdl_model_default_parameters": get_default_model_parameters()}
+        ),
+        output='all',
+        config=pdl.InterpreterConfig(batch=0)
+        )
+
+    # Write result
+    result = output['result']
+    block_to_dict(output["trace"], json_compatible=True)
+    _update_result(pdl_file_name, result)
+
+
+def __test_get_single_program_with_input_result(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
+    """
+    Utility function for testing and updating result for one program with user input.
+    Set to method to public when running pytest
+    """
+
+    pdl_file_name = pathlib.Path("examples") / "folder" / "pdl_program.pdl"
+    inputs = InputsType(stdin="Your Input\n")
+
+    # Set input scope
+    if inputs.stdin is not None:
+        monkeypatch.setattr(
+            "sys.stdin",
+            io.StringIO(inputs.stdin),
+        )
+    if inputs.scope is not None:
+        scope = inputs.scope
+
+    random.seed(11)
+    output = pdl.exec_file(
+        pdl_file_name,
+        scope=scope,
+        output='all',
+        config=pdl.InterpreterConfig(batch=0)
+        )
+
+    # Write result
+    result = output['result']
+    block_to_dict(output["trace"], json_compatible=True)
+    _update_result(pdl_file_name, result)

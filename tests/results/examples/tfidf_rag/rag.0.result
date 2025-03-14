@@ -46,15 +46,9 @@ def remove_all_spaces(text):
 
 Q: Write a python function to remove first and last occurrence of a given character from the string.
 A:```python
-def remove_char_occurrences(s, char):
-    if char not in s:
-        return s  # No need to remove if character is not present
-
-    index1 = s.find(char)
-    index2 = s.rfind(char)
-
-    if index1 == -1 or index2 == -1:
-        return s  # No first or last occurrence, so no removal needed
-
-    return s[:index1] + s[index1+1:index2] + s[index2+1:]
+def remove_char_from_ends(input_string, char):
+    if input_string and char in (input_string[0], input_string[-1]):
+        return input_string[1:-1].replace(char, '')
+    else:
+        return input_string.replace(char, '')
 ```
