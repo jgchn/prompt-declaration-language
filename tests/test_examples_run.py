@@ -269,7 +269,7 @@ def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     Set to method to public when running pytest
     """
     random.seed(11)
-    pdl_file_name = pathlib.Path("examples") / "hello" / "hello.pdl"
+    pdl_file_name = pathlib.Path("examples") / "tools" / "calc.pdl"
     output = pdl.exec_file(
         pdl_file_name,
         scope=PdlDict({"pdl_model_default_parameters": get_default_model_parameters()}),
