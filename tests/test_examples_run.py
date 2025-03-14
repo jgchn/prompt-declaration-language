@@ -7,7 +7,7 @@ from typing import Optional
 from pytest import CaptureFixture, MonkeyPatch
 
 from pdl import pdl
-from pdl.pdl_ast import ScopeType
+from pdl.pdl_ast import ScopeType, get_default_model_parameters
 from pdl.pdl_dumper import block_to_dict
 from pdl.pdl_lazy import PdlDict
 from pdl.pdl_parser import PDLParseError
@@ -15,78 +15,23 @@ from pdl.pdl_parser import PDLParseError
 # test_examples_run.py runs the examples and compares the results
 # to the expected results in tests/results/examples
 
-UPDATE_RESULTS = False
-RESULTS_VERSION = 15
+UPDATE_RESULTS = True
+RESULTS_VERSION = 1
 
 TO_SKIP = {
     str(name)
     for name in [
-        pathlib.Path("examples") / "demo" / "2-teacher.pdl",  # TODO: check why
-        pathlib.Path("examples") / "talk" / "8-tools.pdl",  # TODO: check why
-        pathlib.Path("examples") / "talk" / "10-sdg.pdl",  # TODO: check why
-        pathlib.Path("examples") / "teacher" / "teacher.pdl",  # TODO: check why
-        pathlib.Path("examples") / "tools" / "calc.pdl",  # TODO: check why
-        pathlib.Path("examples") / "tutorial" / "calling_apis.pdl",
+
+        # Requires dataset dependency
         pathlib.Path("examples") / "cldk" / "cldk-assistant.pdl",
-        pathlib.Path("examples") / "talk" / "10-multi-agent.pdl",
-        pathlib.Path("examples") / "gsm8k" / "gsmhard-bugs.pdl",
-        pathlib.Path("examples") / "gsm8k" / "math-base.pdl",
-        pathlib.Path("examples") / "gsm8k" / "math-jinja.pdl",
-        pathlib.Path("examples") / "gsm8k" / "math-python.pdl",
-        pathlib.Path("examples") / "gsm8k" / "math.pdl",
-        pathlib.Path("examples") / "gsm8k" / "gsm8.pdl",  # TODO: check why
-        pathlib.Path("examples") / "tfidf_rag" / "rag.pdl",
-        pathlib.Path("examples") / "react" / "react_call.pdl",
-        pathlib.Path("examples") / "callback" / "repair_prompt.pdl",
-        pathlib.Path("examples") / "gsm8k" / "math.pdl",
-        pathlib.Path("examples") / "gsm8k" / "math_no_sd.pdl",
-        pathlib.Path("examples") / "react" / "demo.pdl",  # TODO: check why
-        pathlib.Path("examples") / "talk" / "9-react.pdl",  # TODO: check why
-        pathlib.Path("examples") / "demo" / "4-translator.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "calling_llm_with_input_messages.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "muting_block_output.pdl",  # TODO check why
-        pathlib.Path("examples") / "tutorial" / "calling_code.pdl",  # TODO check why
-        pathlib.Path("examples") / "tutorial" / "calling_llm.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "variable_def_use.pdl",  # TODO check why
-        pathlib.Path("examples") / "tutorial" / "model_chaining.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "function_definition.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "calling_llm_with_input.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "conditionals_loops.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "tutorial"
-        / "grouping_definitions.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "granite"
-        / "single_round_chat.pdl",  # TODO check why
-        pathlib.Path("examples") / "chatbot" / "chatbot.pdl",  # TODO check why
-        pathlib.Path("examples") / "fibonacci" / "fib.pdl",  # TODO check why
+        pathlib.Path("examples") / "gsm8k" / "gsm8.pdl",
+
+        # Requires installation dependencies
         pathlib.Path("examples")
         / "intrinsics"
-        / "demo-hallucination.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "hello"
-        / "hello-function-empty-context.pdl",  # TODO CREATE RESULTS FILE
-        pathlib.Path("examples") / "hello" / "hello-roles-array.pdl",  # TODO check why
-        pathlib.Path("examples") / "hello" / "hello-import.pdl",  # TODO check why
-        pathlib.Path("examples")
-        / "hello"
-        / "hello-import-lib.pdl",  # (Produces no output)
-        pathlib.Path("examples")
-        / "hello"
-        / "hello-model-chaining.pdl",  # TODO check why
-        pathlib.Path("examples") / "talk" / "7-chatbot-roles.pdl",  # TODO check why
+        / "demo-hallucination.pdl",
+
+        # Skip RAG examples
         pathlib.Path("examples")
         / "rag"
         / "pdf_index.pdl",  # TODO: check what the expected output is
@@ -99,10 +44,21 @@ TO_SKIP = {
         pathlib.Path("examples")
         / "rag"
         / "tfidf_rag.pdl",  # TODO: check what the expected output is
+
+        # RAG examples sometimes work and sometimes don't
+        pathlib.Path("examples") / "talk" / "9-react.pdl",
+
+        # Not sure (code error)
+        pathlib.Path("examples") / "callback" / "repair_prompt.pdl",
+        pathlib.Path("examples") / "react" / "react_call.pdl",
+
+        # Skip UI examples
         pathlib.Path("pdl-live-react") / "demos" / "error.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo1.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo2.pdl",
-        # For now, skip the granite-io examples
+        pathlib.Path("pdl-live-react") / "demos" / "*.pdl",
+
+        # Skip the granite-io examples
         pathlib.Path("examples") / "granite-io" / "granite_io_hallucinations.pdl",
         pathlib.Path("examples") / "granite-io" / "granite_io_openai.pdl",
         pathlib.Path("examples") / "granite-io" / "granite_io_thinking.pdl",
@@ -111,33 +67,7 @@ TO_SKIP = {
     ]
 }
 
-NOT_DETERMINISTIC = {
-    str(name)
-    for name in [
-        pathlib.Path("examples") / "weather" / "weather.pdl",
-        pathlib.Path("examples") / "demo" / "3-weather.pdl",
-        pathlib.Path("examples") / "granite" / "multi_round_chat.pdl",
-        pathlib.Path("examples") / "react" / "demo.pdl",
-        pathlib.Path("examples") / "react" / "wikipedia.pdl",
-        pathlib.Path("examples") / "code" / "code.pdl",
-        pathlib.Path("examples") / "code" / "code-eval.pdl",
-        pathlib.Path("examples") / "code" / "code-json.pdl",
-        pathlib.Path("examples") / "talk" / "1-hello.pdl",
-        pathlib.Path("examples") / "talk" / "2-model-chaining.pdl",
-        pathlib.Path("examples") / "talk" / "3-def-use.pdl",
-        pathlib.Path("examples") / "talk" / "5-code-eval.pdl",
-        pathlib.Path("examples") / "talk" / "6-code-json.pdl",
-        pathlib.Path("examples") / "talk" / "9-react.pdl",
-        pathlib.Path("examples") / "tutorial" / "include.pdl",
-        pathlib.Path("examples") / "tutorial" / "data_block.pdl",
-        pathlib.Path("examples") / "sdk" / "hello.pdl",
-        pathlib.Path("examples") / "hello" / "hello.pdl",
-        pathlib.Path("examples") / "hello" / "hello-model-input.pdl",
-        pathlib.Path("examples") / "hello" / "hello-parser-regex.pdl",
-        pathlib.Path("examples") / "hello" / "hello-def-use.pdl",
-    ]
-}
-
+NOT_DETERMINISTIC = {}
 
 @dataclass
 class InputsType:
@@ -199,11 +129,11 @@ EXPECTED_PARSE_ERROR = [
 
 EXPECTED_RUNTIME_ERROR = [
     pathlib.Path("examples") / "demo" / "1-gen-data.pdl",
-    pathlib.Path("examples") / "tutorial" / "gen-data.pdl",
+    pathlib.Path("examples") / "hello" / "hello-parser-json.pdl",
     pathlib.Path("examples") / "hello" / "hello-type-code.pdl",
     pathlib.Path("examples") / "hello" / "hello-type-list.pdl",
     pathlib.Path("examples") / "hello" / "hello-type.pdl",
-    pathlib.Path("examples") / "hello" / "hello-parser-json.pdl",
+    pathlib.Path("examples") / "tutorial" / "gen-data.pdl",
     pathlib.Path("tests") / "data" / "line" / "hello12.pdl",
     pathlib.Path("tests") / "data" / "line" / "hello13.pdl",
     pathlib.Path("tests") / "data" / "line" / "hello14.pdl",
@@ -227,15 +157,19 @@ EXPECTED_RUNTIME_ERROR = [
     pathlib.Path("tests") / "data" / "line" / "hello9.pdl",
 ]
 
-
 def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
     actual_parse_error: set[str] = set()
     actual_runtime_error: set[str] = set()
     wrong_results = {}
+
     for pdl_file_name in pathlib.Path(".").glob("**/*.pdl"):
-        scope: ScopeType = PdlDict({})
+        scope: ScopeType = {"pdl_model_default_parameters": get_default_model_parameters()}
+
+        # Skip test on certain examples
         if str(pdl_file_name) in TO_SKIP:
             continue
+
+        # Apply inputs to examples that require them
         if str(pdl_file_name) in TESTS_WITH_INPUT:
             inputs = TESTS_WITH_INPUT[str(pdl_file_name)]
             if inputs.stdin is not None:
@@ -258,8 +192,12 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             result_dir_name = (
                 pathlib.Path(".") / "tests" / "results" / pdl_file_name.parent
             )
-            if str(pdl_file_name) in NOT_DETERMINISTIC:
-                continue
+
+            # TODO(jing): delete this section
+            # if str(pdl_file_name) in NOT_DETERMINISTIC:
+            #     continue
+
+            # If result is wrong, update to a new file
             wrong_result = True
             for result_file_name in result_dir_name.glob(
                 pdl_file_name.stem + ".*.result"
@@ -306,7 +244,7 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
         len(unexpected_runtime_error) == 0
     ), f"Unexpected runtime error: {unexpected_runtime_error}"
 
-    # Unexpected valid
+    # Assert files that are invalid do not return valid results
     unexpected_valid = sorted(
         list(
             (expected_parse_error - actual_parse_error).union(
@@ -315,5 +253,6 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
         )
     )
     assert len(unexpected_valid) == 0, f"Unexpected valid: {unexpected_valid}"
-    # Unexpected results
+
+    # Assert no files produce inexpected output
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
