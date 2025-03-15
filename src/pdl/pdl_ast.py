@@ -295,7 +295,7 @@ class LitellmParameters(BaseModel):
     timeout: Optional[Union[float, str]] | str = None
     """Timeout in seconds for completion requests (Defaults to 600 seconds).
     """
-    temperature: Optional[float] | str = None
+    temperature: Optional[float] | str = "0"
     """The temperature parameter for controlling the randomness of the output (default is 1.0).
     """
     top_p: Optional[float] | str = None
