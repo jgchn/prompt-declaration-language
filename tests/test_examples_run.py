@@ -210,7 +210,8 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
                 config=pdl.InterpreterConfig(batch=0),
             )
             result = output["result"]
-            block_to_dict(output["trace"], json_compatible=True)
+            d = block_to_dict(output["trace"], json_compatible=True)
+            print(f"{d=}")
             result_dir_name = _get_result_dir_name(pdl_file_name)
 
             # If result is wrong, update to a new file
@@ -237,8 +238,8 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             actual_runtime_error |= {str(pdl_file_name)}
             print(exc)
 
-    print(output)
-    print(result)
+    # print(output)
+    # print(result)
     # Parse errors
     expected_parse_error = set(str(p) for p in [])
     unexpected_parse_error = sorted(list(actual_parse_error - expected_parse_error))
