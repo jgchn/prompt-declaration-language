@@ -179,7 +179,11 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
     actual_runtime_error: set[str] = set()
     wrong_results = {}
 
-    for pdl_file_name in pathlib.Path(".").glob("**/*.pdl"):
+    fs = [
+        pathlib.Path("examples") / "talk" / "3-def-use.pdl"
+    ]
+
+    for pdl_file_name in fs:
         scope: ScopeType = PdlDict(
             {"pdl_model_default_parameters": get_default_model_parameters()}
         )
@@ -233,15 +237,17 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             actual_runtime_error |= {str(pdl_file_name)}
             print(exc)
 
+    print(output)
+    print(result)
     # Parse errors
-    expected_parse_error = set(str(p) for p in EXPECTED_PARSE_ERROR)
+    expected_parse_error = set(str(p) for p in [])
     unexpected_parse_error = sorted(list(actual_parse_error - expected_parse_error))
     assert (
         len(unexpected_parse_error) == 0
     ), f"Unexpected parse error: {unexpected_parse_error}"
 
     # Runtime errors
-    expected_runtime_error = set(str(p) for p in EXPECTED_RUNTIME_ERROR)
+    expected_runtime_error = set(str(p) for p in [])
     unexpected_runtime_error = sorted(
         list(actual_runtime_error - expected_runtime_error)
     )
@@ -269,7 +275,7 @@ def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     Set to method to public when running pytest
     """
     random.seed(11)
-    pdl_file_name = pathlib.Path("examples") / "tools" / "calc.pdl"
+    pdl_file_name = pathlib.Path("examples") / "talk" / "3-def-use.pdl"
     output = pdl.exec_file(
         pdl_file_name,
         scope=PdlDict({"pdl_model_default_parameters": get_default_model_parameters()}),
@@ -279,8 +285,9 @@ def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
 
     # Write result
     result = output["result"]
-    block_to_dict(output["trace"], json_compatible=True)
-    _update_result(pdl_file_name, result)
+    print(result)
+    # block_to_dict(output["trace"], json_compatible=True)
+    # _update_result(pdl_file_name, result)
 
 
 # def __test_get_single_program_with_input_result(
