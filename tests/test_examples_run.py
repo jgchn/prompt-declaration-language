@@ -238,7 +238,7 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             actual_runtime_error |= {str(pdl_file_name)}
             print(exc)
 
-    # print(output)
+    print(output)
     # print(result)
     # Parse errors
     expected_parse_error = set(str(p) for p in [])
