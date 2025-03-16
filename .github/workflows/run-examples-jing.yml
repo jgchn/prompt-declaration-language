@@ -15,12 +15,6 @@ jobs:
 
     steps:
 
-      # Free up some disk space
-    - name: Remove unnecessary files
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
       # Set up Ollama
     - name: Install Ollama and start server
       shell: bash
@@ -31,13 +25,12 @@ jobs:
       shell: bash
       run: |
         ollama pull granite3.2:2b
-        ollama pull granite3.2:8b
         ollama list
 
     - name: Check that all required models are available
       shell: bash
       run: |
-        models=("granite3.2:2b" "granite3.2:8b")
+        models=("granite3.2:2b")
         missing=0
         for model in "${models[@]}"; do
           if ! ollama list | awk 'NR>1 {print $1}' | grep -q "$model"; then
@@ -113,17 +106,17 @@ jobs:
     #   run: py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py
 
 
-# curl http://localhost:11434/api/chat -d '{
-#   "model": "granite3.2:2b",
-#   "messages": [
-#     {
-#       "role": "user",
-#       "content": "Translate the word Hello to French\n"
-#     }
-#   ],
-#   "options": {
-#     "temperature": 0
-#   },
-#   "stop": ["\n"],
-#   "stream": false
-# }'
+curl http://localhost:11434/api/chat -d '{
+  "model": "granite3.2:8b",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Translate the word Hello to French\n"
+    }
+  ],
+  "options": {
+    "temperature": 0
+  },
+  "stop": ["\n"],
+  "stream": false
+}'
