@@ -106,17 +106,17 @@ jobs:
     #   run: py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py
 
 
-curl http://localhost:11434/api/chat -d '{
-  "model": "granite3.2:8b",
-  "messages": [
-    {
-      "role": "user",
-      "content": "Translate the word Hello to French\n"
-    }
-  ],
-  "options": {
-    "temperature": 0
-  },
-  "stop": ["\n"],
-  "stream": false
-}'
+# curl http://localhost:11434/api/chat -d '{
+#   "model": "granite3.2:8b",
+#   "messages": [
+#     {
+#       "role": "user",
+#       "content": "Translate the word Hello to French\n"
+#     }
+#   ],
+#   "options": {
+#     "temperature": 0
+#   },
+#   "stop": ["\n"],
+#   "stream": false
+# }'
