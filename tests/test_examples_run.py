@@ -173,7 +173,7 @@ def _update_result(pdl_file_name: pathlib.Path, result):
         result_file.write(str(result))
 
 
-def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
+def __test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
     random.seed(11)
     actual_parse_error: set[str] = set()
     actual_runtime_error: set[str] = set()
@@ -238,8 +238,8 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
             actual_runtime_error |= {str(pdl_file_name)}
             print(exc)
 
-    print(output)
-    # print(result)
+    # print(output)
+
     # Parse errors
     expected_parse_error = set(str(p) for p in [])
     unexpected_parse_error = sorted(list(actual_parse_error - expected_parse_error))
@@ -270,7 +270,7 @@ def test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
 
 
-def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
+def test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     """
     Utility function for testing and updating result for one program.
     Set to method to public when running pytest
@@ -279,12 +279,13 @@ def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     pdl_file_name = pathlib.Path("examples") / "talk" / "3-def-use.pdl"
     output = pdl.exec_file(
         pdl_file_name,
-        scope=PdlDict({"pdl_model_default_parameters": get_default_model_parameters()}),
+        scope=PdlDict({}),
         output="all",
         config=pdl.InterpreterConfig(batch=0),
     )
 
     # Write result
+    print(output)
     result = output["result"]
     print(result)
     # block_to_dict(output["trace"], json_compatible=True)

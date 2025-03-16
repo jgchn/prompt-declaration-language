@@ -5,10 +5,8 @@ text:
   def: name
   parameters:
     stop: ["!"]
-    temperature: 0
 - "\n"
 - model: ollama_chat/granite3.2:2b
   input: "Translate the word ${ name | trim } to French\n"
   parameters:
     stop: ["\n"]
-    temperature: 0

@@ -295,7 +295,7 @@ class LitellmParameters(BaseModel):
     timeout: Optional[Union[float, str]] | str = None
     """Timeout in seconds for completion requests (Defaults to 600 seconds).
     """
-    temperature: Optional[float] | str = "0"
+    temperature: Optional[float] = 0
     """The temperature parameter for controlling the randomness of the output (default is 1.0).
     """
     top_p: Optional[float] | str = None
@@ -992,12 +992,12 @@ def get_default_model_parameters() -> list[dict[str, Any]]:
         # models on Ollama (e.g. granite-code, granite3-dense, granite3.1-dense)
         {
             "ollama/*": {
-                "temperature": 0,
+                "temperature": 0
             },
         },
         {
             "ollama_chat/*": {
-                "temperature": 0,
+                "temperature": 0
             },
         },
     ]

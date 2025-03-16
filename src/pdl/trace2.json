@@ -1,0 +1,108 @@
+{
+    "kind": "text",
+    "pdl__id": "text",
+    "description": "Variable def and use, model input",
+    "defs": {},
+    "text": [
+        {
+            "kind": "data",
+            "pdl__id": "text.0",
+            "defs": {},
+            "data": "Hello\n",
+            "pdl__result": "Hello\n",
+            "pdl__timing": {
+                "start_nanos": 1742002664548394200,
+                "end_nanos": 1742002664549511700,
+                "timezone": "UTC"
+            },
+            "pdl__is_leaf": true
+        },
+        {
+            "kind": "model",
+            "pdl__id": "text.1.model",
+            "context": [
+                {
+                    "role": "user",
+                    "content": "Hello\n",
+                    "defsite": "text.0"
+                }
+            ],
+            "defs": {},
+            "platform": "litellm",
+            "model": "ollama_chat/granite3.2:2b",
+            "input": "${ pdl_context }",
+            "parameters": {
+                "temperature": 0,
+                "stop": [
+                    "!"
+                ]
+            },
+            "def": "name",
+            "pdl__result": "Hello",
+            "pdl__timing": {
+                "start_nanos": 1742002664648215300,
+                "end_nanos": 1742002671426285300,
+                "timezone": "UTC"
+            },
+            "pdl__is_leaf": true
+        },
+        {
+            "kind": "data",
+            "pdl__id": "text.2",
+            "defs": {},
+            "data": "\n",
+            "pdl__result": "\n",
+            "pdl__timing": {
+                "start_nanos": 1742002671426349000,
+                "end_nanos": 1742002671427010300,
+                "timezone": "UTC"
+            },
+            "pdl__is_leaf": true
+        },
+        {
+            "kind": "model",
+            "pdl__id": "text.3.model",
+            "context": [
+                {
+                    "role": "user",
+                    "content": "Hello\n",
+                    "defsite": "text.0"
+                },
+                {
+                    "content": "Hello",
+                    "role": "assistant",
+                    "defsite": "text.1.model"
+                },
+                {
+                    "role": "user",
+                    "content": "\n",
+                    "defsite": "text.2"
+                }
+            ],
+            "defs": {},
+            "platform": "litellm",
+            "model": "ollama_chat/granite3.2:2b",
+            "input": "Translate the word ${ name | trim } to French\n",
+            "parameters": {
+                "temperature": 0,
+                "stop": [
+                    "\n"
+                ]
+            },
+            "pdl__result": "Hello in French is \"Bonjour\".",
+            "pdl__timing": {
+                "start_nanos": 1742002671427130000,
+                "end_nanos": 1742002672607408400,
+                "timezone": "UTC"
+            },
+            "pdl__is_leaf": true
+        }
+    ],
+    "pdl__result": "Hello\nHello\nHello in French is \"Bonjour\".",
+    "pdl__timing": {
+        "start_nanos": 1742002664548316700,
+        "end_nanos": 1742002672607495400,
+        "timezone": "UTC"
+    },
+    "pdl__is_leaf": false
+}
