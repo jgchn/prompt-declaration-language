@@ -75,7 +75,8 @@ jobs:
           ${{ runner.os }}-pip-new3
           ${{ runner.os }}-new3
     - name: Install dependencies
-      run: pip install --upgrade --upgrade-strategy eager .[all]
+      run: |
+        pip install --upgrade --upgrade-strategy eager -e .[all]
     - name: pip list packages
       run: pip list
     - name: show pip dependencies
