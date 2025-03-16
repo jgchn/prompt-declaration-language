@@ -1,5 +1,4 @@
 import argparse
-import builtins
 import json
 import sys
 from pathlib import Path
@@ -24,7 +23,6 @@ from .pdl_lazy import PdlDict
 from .pdl_parser import parse_file, parse_str
 from .pdl_runner import exec_docker
 from .pdl_utils import validate_scope
-from pdl import pdl_ast
 
 
 class InterpreterConfig(TypedDict, total=False):
@@ -154,8 +152,10 @@ def exec_file(
         config["cwd"] = Path(prog).parent
 
     # Add default params to scope
-    default_param_scope = {"pdl_model_default_parameters": get_default_model_parameters()}
-    final_scope: ScopeType = None
+    default_param_scope = {
+        "pdl_model_default_parameters": get_default_model_parameters()
+    }
+    final_scope: ScopeType = PdlDict({})
 
     if scope is None:
         final_scope = PdlDict(default_param_scope)

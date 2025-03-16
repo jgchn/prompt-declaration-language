@@ -10,22 +10,23 @@ public static Map<String, String> deserializeOffsetMap(String lastSourceOffset) 
   return offsetMap;
 }
 
-The provided Java function `deserializeOffsetMap` is part of the StreamSets Data Collector (streamsets/datacollector) repository, specifically located in the `stagesupport` package under `com.../OffsetUtil.java`. This function aims to deserialize a JSON string into a `Map<String, String>` object, which represents an offset map containing key-value pairs of strings.
+The provided Java function `deserializeOffsetMap` is part of the StreamSets Data Collector (datacollector) repository, specifically located in the `stagesupport/src/main/java/com/` directory. This function is named `OffsetUtil.deserializeOffsetMap`. Its purpose is to convert a JSON string into a `Map<String, String>` object, which represents an offset map.
 
 Here's a breakdown of the code:
 
-1. `@SuppressWarnings("unchecked")`: This annotation is used to suppress potential warnings related to unchecked or raw type usage. In this case, it indicates that the developer knows the type is safe and doesn't want to see warnings about it.
+1. The method is annotated with `@SuppressWarnings("unchecked")`, which informs the compiler that there might be potential unchecked type conversions in the code. In this case, it's safe because we're working with `Map<String, String>`.
 
-2. `public static Map<String, String> deserializeOffsetMap(String lastSourceOffset) throws IOException`: This line defines a public static method named `deserializeOffsetMap` in the OffsetUtil class. It takes one parameter:
-   - `lastSourceOffset`: A string representing a JSON offset map.
+2. The function takes a single parameter, `lastSourceOffset`, of type `String`. This is expected to contain JSON data representing an offset map.
 
-3. The function begins with an if-else statement to handle two possible scenarios for `lastSourceOffset`:
+3. It returns a `Map<String, String>` object.
 
-   a. If `lastSourceOffset` is null or empty (`lastSourceOffset == null || lastSourceOffset.isEmpty()`), the method initializes and returns a new HashMap called `offsetMap`. This indicates that no offset map was provided, so an empty one will be created.
+4. Inside the method:
+
+   - If `lastSourceOffset` is null or empty (i.e., it has no value), the function initializes `offsetMap` as a new instance of `HashMap`. This serves as an empty map when no JSON data is provided.
    
-   b. Otherwise, if `lastSourceOffset` contains valid JSON data:
-      - The function uses `JSON_MAPPER`, presumably a Jackson ObjectMapper instance, to deserialize the input string (`lastSourceOffset`) into a Map of type `Map.class`. This means it converts the JSON string into a HashMap.
+   - Otherwise, if `lastSourceOffset` contains valid JSON data:
+     - The method uses `JSON_MAPPER`, presumably a Jackson ObjectMapper or similar JSON parsing library, to deserialize the input string into a `Map<String, String>` object. This conversion happens via `readValue(lastSourceOffset, Map.class)`.
 
-4. Finally, the method returns the deserialized `offsetMap` (either an empty one or the JSON-parsed map).
+5. Finally, the function returns the deserialized map (`offsetMap`).
 
-In summary, this function serves to safely convert a JSON offset map string into a Java Map<String, String> object. If no valid JSON data is provided as input, it creates and returns an empty HashMap; otherwise, it parses the given JSON string into a Map using Jackson's ObjectMapper.
+In summary, this function serves as a utility for converting JSON strings representing offset maps into Java `Map` objects. It handles both null and empty inputs gracefully by initializing an empty map when no data is provided.

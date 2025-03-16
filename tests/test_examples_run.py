@@ -173,20 +173,19 @@ def _update_result(pdl_file_name: pathlib.Path, result):
         result_file.write(str(result))
 
 
-def __test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> None:
+def test_valid_programs(
+    capsys: CaptureFixture[str], monkeypatch: MonkeyPatch
+) -> None:
     random.seed(11)
     actual_parse_error: set[str] = set()
     actual_runtime_error: set[str] = set()
     wrong_results = {}
 
-    fs = [
-        pathlib.Path("examples") / "talk" / "3-def-use.pdl"
-    ]
+    # fs = [pathlib.Path("examples") / "talk" / "3-def-use.pdl"]
+    fs = pathlib.Path(".").glob("**/*.pdl")
 
     for pdl_file_name in fs:
-        scope: ScopeType = PdlDict(
-            {"pdl_model_default_parameters": get_default_model_parameters()}
-        )
+        scope: ScopeType = PdlDict({})
 
         # Skip test on certain examples
         if str(pdl_file_name) in TO_SKIP:
@@ -210,8 +209,7 @@ def __test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch)
                 config=pdl.InterpreterConfig(batch=0),
             )
             result = output["result"]
-            d = block_to_dict(output["trace"], json_compatible=True)
-            print(f"{d=}")
+            block_to_dict(output["trace"], json_compatible=True)
             result_dir_name = _get_result_dir_name(pdl_file_name)
 
             # If result is wrong, update to a new file
@@ -238,17 +236,15 @@ def __test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch)
             actual_runtime_error |= {str(pdl_file_name)}
             print(exc)
 
-    # print(output)
-
     # Parse errors
-    expected_parse_error = set(str(p) for p in [])
+    expected_parse_error = set(str(p) for p in EXPECTED_PARSE_ERROR)
     unexpected_parse_error = sorted(list(actual_parse_error - expected_parse_error))
     assert (
         len(unexpected_parse_error) == 0
     ), f"Unexpected parse error: {unexpected_parse_error}"
 
     # Runtime errors
-    expected_runtime_error = set(str(p) for p in [])
+    expected_runtime_error = set(str(p) for p in EXPECTED_RUNTIME_ERROR)
     unexpected_runtime_error = sorted(
         list(actual_runtime_error - expected_runtime_error)
     )
@@ -270,13 +266,13 @@ def __test_valid_programs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch)
     assert len(wrong_results) == 0, f"Wrong results: {wrong_results}"
 
 
-def test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
+def __test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     """
     Utility function for testing and updating result for one program.
     Set to method to public when running pytest
     """
     random.seed(11)
-    pdl_file_name = pathlib.Path("examples") / "talk" / "3-def-use.pdl"
+    pdl_file_name = pathlib.Path("examples") / "demo" / "2-teacher.pdl"
     output = pdl.exec_file(
         pdl_file_name,
         scope=PdlDict({}),
@@ -285,42 +281,59 @@ def test_get_single_program_result(capsys: CaptureFixture[str]) -> None:
     )
 
     # Write result
-    print(output)
     result = output["result"]
     print(result)
-    # block_to_dict(output["trace"], json_compatible=True)
-    # _update_result(pdl_file_name, result)
+    block_to_dict(output["trace"], json_compatible=True)
+    _update_result(pdl_file_name, result)
 
+def __test_multiple_programs_result(capsys: CaptureFixture[str]) -> None:
+    random.seed(11)
+    fs = [
+        pathlib.Path("examples") / "tfidf_rag" / "rag.pdl",
+        pathlib.Path("examples") / "talk" / "10-sdg.pdl",
+        pathlib.Path("examples") / "demo" / "2-teacher.pdl",
+        pathlib.Path("examples") / "react" / "demo.pdl"
+    ]
 
-# def __test_get_single_program_with_input_result(
-#     capsys: CaptureFixture[str], monkeypatch: MonkeyPatch
-# ) -> None:
-#     """
-#     Utility function for testing and updating result for one program with user input.
-#     Set to method to public when running pytest
-#     """
+    for f in fs:
+        output = pdl.exec_file(
+            f,
+            scope=PdlDict({}),
+            output="all",
+            config=pdl.InterpreterConfig(batch=0),
+        )
 
-#     random.seed(11)
-#     pdl_file_name = pathlib.Path("examples") / "chatbot" / "chatbot.pdl"
-#     inputs = InputsType(stdin="What is APR?\nyes\n")
-#     scope = PdlDict({})
+        # Write result
+        result = output["result"]
+        print(result)
+        block_to_dict(output["trace"], json_compatible=True)
+        _update_result(f, result)
 
-#     # Set input scope
-#     if inputs.stdin is not None:
-#         monkeypatch.setattr(
-#             "sys.stdin",
-#             io.StringIO(inputs.stdin),
-#         )
-#     if inputs.scope is not None:
-#         scope = inputs.scope
-#         if "pdl_model_default_parameters" not in scope:
-#             scope["pdl_model_default_parameters"] = get_default_model_parameters()
+def __test_get_single_program_with_input_result(
+    capsys: CaptureFixture[str], monkeypatch: MonkeyPatch
+) -> None:
+    """
+    Utility function for testing and updating result for one program with user input.
+    Set to method to public when running pytest
+    """
 
-#     output = pdl.exec_file(
-#         pdl_file_name, scope=scope, output="all", config=pdl.InterpreterConfig(batch=0)
-#     )
+    random.seed(11)
+    pdl_file_name = pathlib.Path("examples") / "chatbot" / "chatbot.pdl"
+    inputs = InputsType(stdin="What is APR?\nyes\n")
+    scope = PdlDict({})
 
-#     # Write result
-#     result = output["result"]
-#     block_to_dict(output["trace"], json_compatible=True)
-#     _update_result(pdl_file_name, result)
+    # Set input scope
+    if inputs.stdin is not None:
+        monkeypatch.setattr(
+            "sys.stdin",
+            io.StringIO(inputs.stdin),
+        )
+
+    output = pdl.exec_file(
+        pdl_file_name, scope=scope, output="all", config=pdl.InterpreterConfig(batch=0)
+    )
+
+    # Write result
+    result = output["result"]
+    block_to_dict(output["trace"], json_compatible=True)
+    _update_result(pdl_file_name, result)

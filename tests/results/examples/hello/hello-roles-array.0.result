@@ -2,7 +2,7 @@ Here is a Python implementation of the Merge Sort algorithm:
 
 ```python
 def merge_sort(arr):
-    # Base case: if array has 1 or no elements, it's already sorted
+    # Base case: If array has 1 or no elements, return it as sorted
     if len(arr) <= 1:
         return arr
 
@@ -20,13 +20,13 @@ def merge_sort(arr):
 
 def merge(left, right):
     """
-    Merge two sorted lists into a single sorted list.
+    Merge two sorted arrays into one sorted array.
     """
-    merged = []  # Initialize an empty list for the result
-    left_index = 0  # Index for the left list
-    right_index = 0  # Index for the right list
+    merged = []  # Initialize an empty list for merged result
+    left_index = 0  # Index for left array
+    right_index = 0  # Index for right array
 
-    # Continue until we've exhausted both lists
+    # Iterate through both arrays and append the smaller element to merged list
     while left_index < len(left) and right_index < len(right):
         if left[left_index] <= right[right_index]:
             merged.append(left[left_index])
@@ -35,13 +35,13 @@ def merge(left, right):
             merged.append(right[right_index])
             right_index += 1
 
-    # If there are any remaining elements in either list, append them to the result
+    # If there are remaining elements in either array, append them to the end
     merged.extend(left[left_index:])
     merged.extend(right[right_index:])
 
     return merged
 ```
 
-This code first checks if the array is already sorted (i.e., has one or zero elements). If so, it returns the array as is. Otherwise, it divides the array into two halves and recursively sorts each half. The `merge` function then combines these sorted halves back together to produce a single sorted list.
+This code first checks if the input list is already sorted (i.e., has one or zero elements). If so, it returns the list as is. Otherwise, it divides the list into two halves and recursively sorts each half. The `merge` function then combines these sorted halves back together in a single sorted list.
 
-The time complexity of Merge Sort is O(n log n) for all cases (best, average, worst), making it efficient even for large lists.
+The time complexity of Merge Sort is O(n log n) for all cases (best, average, worst), making it efficient for sorting large datasets.

@@ -1,20 +1,17 @@
 What is the weather in Madrid?
-The weather in Madrid, Spain, as of the time this data was last updated (2024-11-25 at 3:10 PM local time), is as follows:
+The weather in Madrid, Spain, as of the local time (2024-11-25 15:10), is partly cloudy according to the data from WeatherAPI. Here are some key details:
 
-- Temperature: The current temperature is approximately 14.4 degrees Celsius (57.9 degrees Fahrenheit). This is a partly cloudy day, with the sky showing some clouds but not being fully overcast.
-
-- Wind: There's a moderate wind blowing at around 265 degrees from the west, with a speed of about 13.2 meters per second (or 21.2 kilometers per hour) and 21.2 kilometers per hour respectively. The gust reached up to 15.2 meters per second (or 24.4 kilometers per hour).
-
-- Pressure: Atmospheric pressure is 1017 millibars, which converts to approximately 30 inches of mercury.
-
-- Humidity: The relative humidity is 77%, indicating a relatively moist environment.
-
-- Precipitation: There has been trace amounts of precipitation (precip_mm = 0.01), but no rain or snow, as indicated by the precipitation code 1003 and zero in millimeters (precip_in).
-
-- Other conditions:
-  - Feels like temperature is slightly lower due to wind chill at 13 degrees Celsius (55.4 degrees Fahrenheit), while heat index suggests it feels warmer, around 14.5 degrees Celsius (58.2 degrees Fahrenheit) because of the combination of high temperature and humidity.
-  - Dew point is 7.3 degrees Celsius (45.2 degrees Fahrenheit), indicating a moist environment where dew would form overnight.
-  - Visibility is approximately 10 kilometers or 6 miles, with clear skies allowing for good visibility.
-  - UV index stands at 1.4, which means moderate levels of ultraviolet radiation are present and caution should be taken to protect skin from sunburn.
-
-Overall, Madrid is experiencing a partly cloudy day with moderate wind, relatively high humidity, and a mix of warm temperatures and cooler feels-like conditions due to the wind chill effect.
+- Temperature: The current temperature is 14.4°C or 57.9°F.
+- Condition: It's described as 'Partly cloudy' with a text description of 'Partly cloudy'. An icon representing this condition can be found at '//cdn.weatherapi.com/weather/64x64/day/116.png'.
+- Wind Speed and Direction: The wind is blowing at 13.2 miles per hour (mph) or 21.2 kilometers per hour (kph), coming from the west (W).
+- Pressure: Atmospheric pressure is 1017 millibars (mb) or approximately 30.03 inches of mercury (inHg).
+- Precipitation: There has been no measurable precipitation, with a value of 0.01 millimeters (mm) or 0.0 inches (in).
+- Humidity: The relative humidity is 77%.
+- Cloud Cover: About 75% of the sky is covered by clouds.
+- Feels Like Temperature: This indicates how warm it feels to a person due to factors like temperature, humidity, and wind chill. In Madrid's case, it feels like 12.8°C or 55.1°F.
+- Wind Chill: The wind chill is calculated as 13.0°C (55.4°F), suggesting that the combination of wind speed and temperature makes it feel colder than the actual air temperature.
+- Heat Index: This measures how hot it feels when combined with high humidity and sunshine. In Madrid, it's estimated to be 14.5°C or 58.2°F.
+- Dew Point: The dew point is 7.3°C (45.2°F), indicating the temperature at which air would become saturated and dew might form.
+- Visibility: It's currently 10 kilometers (6.0 miles) or so, with visibility being measured in kilometers by default.
+- UV Index: The UV index is 1.4, suggesting a moderate risk of UV radiation exposure due to the sun's intensity.
+- Gusts: Maximum wind speed recorded within the last hour was 15.2 mph (24.4 kph).
