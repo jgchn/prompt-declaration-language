@@ -20,9 +20,15 @@ jobs:
       - name: Pull model
         run: |
           ollama pull granite3.2:2b
+      - name: Curl model
+        run: |
           curl http://localhost:11434/api/generate -d '{
             "model": "granite3.2:2b",
-            "prompt": "Why is the sky blue?",
+            "prompt": "Translate the word Hello to French\n",
+            "options": {
+              "temperature": 0,
+              "stop": ["\n"]
+              },
             "stream": false
           }'
 
