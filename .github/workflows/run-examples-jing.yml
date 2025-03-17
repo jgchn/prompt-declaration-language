@@ -20,6 +20,10 @@ jobs:
       - name: Pull model
         run: |
           ollama pull granite3.2:2b
+      - name: Health check
+        run: |
+          sleep 5
+          curl http://localhost:11434/api/tags
       - name: Curl model
         run: |
           curl http://localhost:11434/api/generate -d '{
@@ -30,7 +34,7 @@ jobs:
               "stop": ["\n"]
               },
             "stream": false
-          }'
+          }' | jq
 
 #       # Set up Ollama
 #     - name: Install Ollama and start server
