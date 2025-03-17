@@ -24,9 +24,9 @@ jobs:
         run: |
           sleep 5
           curl http://localhost:11434/api/tags
-      - name: Curl model
-        run: |
-          curl http://localhost:11434/api/generate -d '{
+          echo "ANOTHER CURL"
+          sleep 5
+          curl -v http://localhost:11434/api/generate -d '{
             "model": "granite3.2:2b",
             "prompt": "Translate the word Hello to French\n",
             "options": {
@@ -36,10 +36,11 @@ jobs:
             "stream": false
           }' | jq
 
-          sleep 100
+          sleep 10
       - name: Curl again
         run: |
-          curl http://localhost:11434/api/generate -d '{
+          sleep 5
+          curl -v http://localhost:11434/api/generate -d '{
             "model": "granite3.2:2b",
             "prompt": "Translate the word Hello to French\n",
             "options": {
