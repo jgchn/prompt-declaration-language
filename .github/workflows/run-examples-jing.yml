@@ -36,6 +36,8 @@ jobs:
             "stream": false
           }' | jq
 
+          sleep 100
+
 #       # Set up Ollama
 #     - name: Install Ollama and start server
 #       shell: bash
