@@ -37,6 +37,19 @@ jobs:
           }' | jq
 
           sleep 100
+      - name: Curl again
+        run: |
+          curl http://localhost:11434/api/generate -d '{
+            "model": "granite3.2:2b",
+            "prompt": "Translate the word Hello to French\n",
+            "options": {
+              "temperature": 0,
+              "stop": ["\n"]
+              },
+            "stream": false
+          }' | jq
+
+          sleep 100
 
 #       # Set up Ollama
 #     - name: Install Ollama and start server
