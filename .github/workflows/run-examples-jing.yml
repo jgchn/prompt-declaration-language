@@ -17,6 +17,8 @@ jobs:
       # Set up ollama on macos
       - name: Install Ollama and start server
         uses: ai-action/setup-ollama@v1
+        with:
+          version: 0.6.1
       - name: Pull model
         run: |
           ollama pull granite3.2:2b
