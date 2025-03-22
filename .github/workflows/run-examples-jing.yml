@@ -24,11 +24,11 @@ jobs:
       shell: bash
       run: |
         brew install ollama
-        brew services start ollama
 
     - name: Pull models in examples/
       shell: bash
       run: |
+        ollama serve &
         ollama pull granite3.2:2b
         ollama list
 
