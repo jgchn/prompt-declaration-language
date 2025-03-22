@@ -1,0 +1,7 @@
+description: Chatbot
+text:
+# Allow the user to type any question, implicitly adding the question to the context.
+- "What is APR?"
+- model: ollama_chat/granite3.2:2b
+  parameters:
+    temperature: 0
