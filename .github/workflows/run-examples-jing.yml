@@ -24,7 +24,7 @@ jobs:
       shell: bash
       run: |
         brew install ollama
-        ollama serve
+        brew services start ollama
 
     - name: Pull models in examples/
       shell: bash
