@@ -6,8 +6,8 @@ on: [push, pull_request]
 jobs:
   tests:
     name: Execution tests
-    runs-on: ubuntu-latest
-    # runs-on: macos-15-large
+    # runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
