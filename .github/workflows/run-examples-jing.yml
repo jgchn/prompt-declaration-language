@@ -20,6 +20,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install libc6
+        sudo apt-get install ghdl gtkwave
 
     # Set up Ollama
     - name: Install Ollama and start server
