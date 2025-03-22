@@ -15,12 +15,12 @@ jobs:
 
     steps:
 
-    - name: Set up required for Python on ubuntu-20.04
-      shell: bash
-      run: |
-        sudo apt update
-        sudo apt install libc6
-        sudo apt-get install ghdl gtkwave
+    # - name: Set up required for Python on ubuntu-20.04
+    #   shell: bash
+    #   run: |
+    #     sudo apt update
+    #     sudo apt install libc6
+    #     sudo apt-get install ghdl gtkwave
 
     # Set up Ollama
     - name: Install Ollama and start server
@@ -83,7 +83,11 @@ jobs:
           ${{ runner.os }}-pip-new3
           ${{ runner.os }}-new3
     - name: Install dependencies
-      run: pip install --upgrade --upgrade-strategy eager .[all]
+      run: |
+        sudo apt update
+        sudo apt install libc6
+        sudo apt-get install ghdl gtkwave
+        pip install --upgrade --upgrade-strategy eager .[all]
     - name: pip list packages
       run: pip list
     - name: show pip dependencies
