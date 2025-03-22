@@ -23,7 +23,7 @@ text:
   # If the user typed only "yes", finish the `repeat` and end the program
   until: ${ eval == 'yes'}
 
-git add .github/workflows/run-examples-jing.yml examples/chatbot/chatbot.pdl && git commit -S -s -m "Test 9"
+git add .github/workflows/run-examples-jing.yml examples/chatbot/chatbot.pdl && git commit -S -s -m "Test 11"
 git push origin test-ollama-on-gh
 
 
@@ -34,5 +34,6 @@ curl http://localhost:11434/api/chat -d '{
       "role": "user",
       "content": "What is APR?"
     }
-  ]
+  ],
+  "stream": false
 }'
