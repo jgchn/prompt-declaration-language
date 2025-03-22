@@ -15,6 +15,12 @@ jobs:
 
     steps:
 
+    - name: Set up required for Python on ubuntu-20.04
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install libc6
+
     # Set up Ollama
     - name: Install Ollama and start server
       shell: bash

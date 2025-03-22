@@ -23,7 +23,7 @@ text:
   # If the user typed only "yes", finish the `repeat` and end the program
   until: ${ eval == 'yes'}
 
-git add .github/workflows/run-examples-jing.yml examples/chatbot/chatbot.pdl && git commit -S -s -m "Test 12"
+git add .github/workflows/run-examples-jing.yml examples/chatbot/chatbot.pdl && git commit -S -s -m "Test 15"
 git push origin test-ollama-on-gh
 
 
@@ -37,3 +37,8 @@ curl http://localhost:11434/api/chat -d '{
   ],
   "stream": false
 }'
+
+
+podman run -d --gpus=0 -v ollama:/root/.ollama -p 11435:11434 --name ollama ollama/ollama
+
+podman run -d --gpus=all -v ollama:/root/.ollama -p 11436:11434 --name ollama-gpu ollama/ollama
