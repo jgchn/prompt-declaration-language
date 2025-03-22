@@ -22,3 +22,6 @@ text:
           message: "Why not?\n"
   # If the user typed only "yes", finish the `repeat` and end the program
   until: ${ eval == 'yes'}
+
+git add .github/workflows/run-examples-jing.yml && git commit -S -s -m "Test 7"
+git push origin test-ollama-on-gh

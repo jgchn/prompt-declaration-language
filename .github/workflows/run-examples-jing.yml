@@ -93,4 +93,4 @@ jobs:
     #   run: py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py
 
     - name: Run chatbot example
-      run: pdl examples/chatbot/chatbot.pdl
+      run: pdl examples/chatbot/chatbot-jing.pdl
