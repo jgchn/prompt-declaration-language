@@ -1,0 +1,27 @@
+name: Pre run examples
+
+on: [push, pull_request]
+
+jobs:
+  pre_run_examples:
+    name: Pre run examples and generate sensible outputs for PDL programs in examples
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: python-version: ['3.11', '3.12', '3.13']
+        python-version: ['3.11']
+    steps:
+      - name: Detect all PDL files that were changed or added
+        id: changed-pdl-files
+        uses: tj-actions/changed-files@823fcebdb31bb35fdf2229d9f769b400309430d0 # v46
+        with:
+          files: "*/**.pdl"
+
+      - name: List files
+        env:
+          ALL_CHANGED_PDL_FILES: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
