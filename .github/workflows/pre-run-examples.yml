@@ -87,6 +87,6 @@ jobs:
       # Run changed PDL files test
       - name: Run against changed PDL files
         run: |
-          for file in ${ALL_CHANGED_PDL_FILES}; do"
+          for file in ${ALL_CHANGED_PDL_FILES}; do
             echo $file
           done
