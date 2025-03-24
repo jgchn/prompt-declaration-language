@@ -23,6 +23,7 @@ jobs:
       - name: List files
         env:
           ALL_CHANGED_PDL_FILES: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+        shell: bash
         run: |
           for file in ${ALL_CHANGED_FILES}; do
             echo "$file was changed"
