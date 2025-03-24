@@ -12,6 +12,7 @@ jobs:
         # TODO: python-version: ['3.11', '3.12', '3.13']
         python-version: ['3.11']
     steps:
+      - uses: actions/checkout@v4
       - name: Detect all PDL files that were changed or added
         id: changed-pdl-files
         uses: tj-actions/changed-files@823fcebdb31bb35fdf2229d9f769b400309430d0 # v46
