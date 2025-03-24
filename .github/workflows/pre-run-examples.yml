@@ -86,6 +86,8 @@ jobs:
 
       # Run changed PDL files test
       - name: Run against changed PDL files
+        env:
+          ALL_CHANGED_PDL_FILES: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
         run: |
           for file in ${ALL_CHANGED_PDL_FILES}; do
             pdl $file
