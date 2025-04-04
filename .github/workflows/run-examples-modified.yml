@@ -68,8 +68,8 @@ jobs:
       with:
         files: |
           **.pdl
-        json: "true"
-        escape_json: "true"
+        # json: "true"
+        # escape_json: "true"
     - name: List PDL files that were modified or added and append to test_examples_run
       env:
         MODIFIED_PDL_FILES: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
