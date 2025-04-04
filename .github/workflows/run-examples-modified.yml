@@ -118,4 +118,4 @@ jobs:
         WATSONX_APIKEY: ${{ secrets.WATSONX_APIKEY }}
         WATSONX_URL: ${{ secrets.WATSONX_URL }}
         REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
-      run: py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py
+      run: py.test -v --capture=tee-sys -rfE -s tests/test_examples_run_new.py
