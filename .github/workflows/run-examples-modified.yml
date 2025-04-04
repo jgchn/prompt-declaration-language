@@ -83,14 +83,14 @@ jobs:
         changes: |
           {
             "tests/test_examples_run.yaml": {
-                "check" :${{ steps.changed-pdl-files.outputs.all_changed_files }}
+                "check": ${{ steps.changed-pdl-files.outputs.all_changed_files }}
               }
           }
         # propertyPath: 'check'
         # value: ${{ fromJSON(steps.changed-pdl-files.outputs.all_changed_files) }}
         commitChange: false
     - name: print yaml config
-      run: cat tests/test_example_run.yaml
+      run: cat tests/test_examples_run.yaml
 
 
     # - name: Set up Python ${{ matrix.python-version }}
