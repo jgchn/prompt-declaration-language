@@ -80,8 +80,8 @@ jobs:
         valueFile: 'tests/test_examples_run.yaml'
         changes: |
           {
-            "check": "${{ steps.changed-pdl-files.outputs.all_changed_files }}"
-          s
+            "check": ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+          }
         # propertyPath: 'check'
         # value: ${{ fromJSON(steps.changed-pdl-files.outputs.all_changed_files) }}
         commitChange: false
