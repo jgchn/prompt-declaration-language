@@ -1,0 +1,95 @@
+---
+    name: Run examples on modified PDL files
+
+    on: [push, pull_request]
+
+    jobs:
+      tests:
+        name: Execution tests
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            python-version: ['3.11', '3.12', '3.13']
+
+        steps:
+        # Run tests
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - name: Detect all PDL files that were changed or added
+          id: changed-pdl-files
+          uses: tj-actions/changed-files@6cb76d07bee4c9772c6882c06c37837bf82a04d3 # v46
+          with:
+            files: |
+              **.pdl
+            json: "true"
+            escape_json: "false"
+        - name: List PDL files that were modified or added and append to test_examples_run
+          env:
+            MODIFIED_PDL_FILES: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+          run: echo "$MODIFIED_PDL_FILES"
+        - name: Patch tests/test_examples_run.yaml with modified files
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
+          uses: fjogeleit/yaml-update-action@main
+          with:
+            valueFile: 'tests/test_examples_run.yaml'
+            changes: |
+              {
+                "tests/test_examples_run.yaml": {
+                    "check": ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+                  }
+              }
+            commitChange: false
+        - name: Print test examples config
+          run: cat tests/test_examples_run.yaml
+
+        - name: No modified PDL file to check
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] == null
+          run: |
+            echo "There is modified PDL files in this commit. Skipping set up for Ollama and Run Examples test."
+
+        # Runs examples on modified PDL files
+        - uses: ./.github/actions/ollama
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+
+        # Run tests
+        - name: Set up Python ${{ matrix.python-version }}
+          uses: actions/setup-python@v5
+          with:
+            python-version: ${{ matrix.python-version }}
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+        - name: Cache pip
+          uses: actions/cache@v4
+          with:
+            # This path is specific to Ubuntu
+            path: ${{ env.pythonLocation }}
+            # Look to see if there is a cache hit for the setup file
+            key: ${{ runner.os }}-pip-new3-${{ env.pythonLocation }}-${{ hashFiles('setup.py') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-new3
+              ${{ runner.os }}-new3
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+        - name: Install dependencies
+          shell: bash
+          run: pip install --upgrade --upgrade-strategy eager .[all]
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+        - name: Pip list packages
+          shell: bash
+          run: pip list
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+        - name: Show pip dependencies
+          shell: bash
+          run: |
+            pip install pipdeptree
+            pipdeptree -fl
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+        - name: Run tests
+          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          shell: bash
+          env:
+            WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
+            WATSONX_APIKEY: ${{ secrets.WATSONX_APIKEY }}
+            WATSONX_URL: ${{ secrets.WATSONX_URL }}
+            REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          run: py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings
