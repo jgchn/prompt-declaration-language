@@ -294,6 +294,7 @@ def test_example_runs(capsys: CaptureFixture[str], monkeypatch: MonkeyPatch) -> 
 
     # Print the wrong results
     for file, actual in background.failed_results.wrong_results.items():
+        print("========================================================================")
         print(f"File that produced wrong result: {file}")
         print(f"Actual:\n{actual}\n")
 
