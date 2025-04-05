@@ -14,8 +14,6 @@ jobs:
         python-version: ['3.11']
 
     steps:
-    # Sets up Ollama
-    - uses: ./.github/actions/ollama
     #   # Free up some disk space
     # - name: Remove unnecessary files
     #   run: |
@@ -64,6 +62,9 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
+        # Sets up Ollama
+    - uses: ./.github/actions/ollama
     - name: Detect all PDL files that were changed or added
       id: changed-pdl-files
       uses: tj-actions/changed-files@6cb76d07bee4c9772c6882c06c37837bf82a04d3 # v46
