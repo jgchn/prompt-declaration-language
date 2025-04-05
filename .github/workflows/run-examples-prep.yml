@@ -45,20 +45,20 @@
           run: cat tests/test_examples_run.yaml
 
         - name: No modified PDL file to check
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] == null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} == '[]'
           run: |
             echo "There is modified PDL files in this commit. Skipping set up for Ollama and Run Examples test."
 
         # Runs examples on modified PDL files
         - uses: ./.github/actions/ollama
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
 
         # Run tests
         - name: Set up Python ${{ matrix.python-version }}
           uses: actions/setup-python@v5
           with:
             python-version: ${{ matrix.python-version }}
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
         - name: Cache pip
           uses: actions/cache@v4
           with:
@@ -69,23 +69,23 @@
             restore-keys: |
               ${{ runner.os }}-pip-new3
               ${{ runner.os }}-new3
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
         - name: Install dependencies
           shell: bash
           run: pip install --upgrade --upgrade-strategy eager .[all]
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
         - name: Pip list packages
           shell: bash
           run: pip list
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
         - name: Show pip dependencies
           shell: bash
           run: |
             pip install pipdeptree
             pipdeptree -fl
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
         - name: Run tests
-          if: steps.changed-pdl-files.outputs.all_changed_files[0] != null
+          if: ${{ steps.changed-pdl-files.outputs.all_changed_files }} != '[]'
           shell: bash
           env:
             WATSONX_PROJECT_ID: ${{ secrets.WATSONX_PROJECT_ID }}
