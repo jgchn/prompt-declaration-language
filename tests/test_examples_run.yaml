@@ -6,7 +6,7 @@ results_version: 1
 # If empty, check all files
 # check accepts a list of strings
 check:
-  # - examples/chatbot/chatbot.pdl
+  - examples/chatbot/chatbot.pdl
   # - examples/tutorial/programs/chatbot.pdl # with inputs
   # - examples/rag/pdf_index.pdl  # skip
   # - tests/data/line/hello3.pdl  # parse error
