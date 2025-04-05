@@ -41,7 +41,7 @@ TO_SKIP = {
         / "rag_library1.pdl",  # (This is glue to Python, it doesn't "run" alone)
         # Skip structure decoding example (Jing doesn't have WATSONX API KEY)
         pathlib.Path("examples") / "tutorial" / "structured_decoding.pdl",
-        # OUtput result include trace (and thus timing) for some reason. Investigate why
+        # Output result include trace (and thus timing) for some reason. Investigate why
         pathlib.Path("examples") / "react" / "react_call.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "error.pdl",
         pathlib.Path("pdl-live-react") / "demos" / "demo1.pdl",

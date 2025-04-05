@@ -4,6 +4,7 @@ runs:
   using: 'composite'
   steps:
     - name: Remove unnecessary files
+      shell: bash
       run: |
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
@@ -45,4 +46,3 @@ runs:
       run: |
         sleep 10
         time curl -i http://localhost:11434
-
