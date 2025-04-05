@@ -22,7 +22,7 @@ text:
       Function_name: ${ CODE.repo_info.function_name }
 
 
-      Explain the following code:
+      Please Explain the following code:
       ```
       ${ CODE.source_code }```
   parameters:
