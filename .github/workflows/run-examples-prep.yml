@@ -36,7 +36,7 @@ jobs:
     - name: Check if update results automatically by GitHub Actions Bot 
       id: parse-run-examples-config
       run: |
-        value=$(yq '.update_results' config.yaml | tr '[:upper:]' '[:lower:]')
+        value=$(yq '.update_results' tests/test_examples_run.yaml | tr '[:upper:]' '[:lower:]')
         echo "value=$value"
         echo "update_results=$value" >> $GITHUB_OUTPUT
       # Install yq if needed
