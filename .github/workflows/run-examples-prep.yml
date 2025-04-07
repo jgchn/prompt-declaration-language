@@ -43,12 +43,12 @@ jobs:
       # Install yq if needed
       shell: bash
       
-    # Define a lock if update results to prevent matrix updating results at once
-    - name: Lock job for updating results 
-      uses: softprops/turnstyle@v2
-      if: ${{ steps.parse-run-examples-config.outputs.update_results == 'true' }}
-      with:
-        poll-interval-seconds: 5
+    # # Define a lock if update results to prevent matrix updating results at once
+    # - name: Lock job for updating results 
+    #   uses: softprops/turnstyle@v2
+    #   if: ${{ steps.parse-run-examples-config.outputs.update_results == 'true' }}
+    #   with:
+    #     poll-interval-seconds: 5
       
     - uses: ./.github/actions/run-examples
       if: ${{ steps.changed-pdl-files.outputs.all_changed_files_count > 0 }}
@@ -60,3 +60,6 @@ jobs:
         head-ref: ${{ github.head_ref }}
         github-actor-id: ${{ github.actor_id }}
         github-actor: ${{ github.actor }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-repository: ${{ github.repository }}
+        
