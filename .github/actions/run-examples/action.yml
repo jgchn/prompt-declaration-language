@@ -100,11 +100,13 @@ runs:
               }
           }
         commitChange: true
+        createPR: false
         branch: ${{ inputs.head-ref }}
+        masterBranchName: ${{ inputs.head-ref }}
         messge: "Reverting update_results to False. If you wish to update again, change locally and push with change."
         token: ${{ inputs.github-token }}
         repository: ${{ inputs.github-repository }}
-        createPR: false
+        commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
     
     # Commit the results if update results
     - name: Push new results to branch
