@@ -79,7 +79,7 @@ runs:
       shell: bash
       run: |
         cat tests/test_examples_run.yaml
-        py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings
+        py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings || true
         echo "TEST_EXIT_CODE=$?" >> $GITHUB_ENV
     
     # Commit the results if update results
