@@ -8,6 +8,15 @@ inputs:
   runner-os:
     description: 'Runner OS'
     required: true
+  update-results:
+    description: 'Whether to update the results for this run. Must be False for nightly runs'
+    required: true
+  github-actor-id:
+    description: 'Github actor ID if commit changes'
+    required: false
+  github-actor:
+    description: 'Github actor if commit changes'
+    required: false
   check:
     description: 'Files to patch tests/test_examples_run.yaml with. These are the PDL files that the test will run against. Defaults to all PDL files.'
     required: false
@@ -71,3 +80,28 @@ runs:
       run: |
         cat tests/test_examples_run.yaml
         py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings
+    
+    # Commit the results if update results
+    - name: Push new results to branch
+      shell: bash
+      if: ${{ inputs.update-results == 'true' }}
+      run: |
+        git config --local user.name github-actions[bot]
+        git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+        git status
+        git add tests/results/
+        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
+        git push
+ 
+    # Patch config with update_results to false
+    - name: Patch tests/test_examples_run.yaml with update_results to False
+      if: ${{ inputs.update-results == 'true' }}
+      uses: fjogeleit/yaml-update-action@main
+      with:
+        changes: |
+          {
+            "tests/test_examples_run.yaml": {
+                "update_results": false
+              }
+          }
+        commitChange: true

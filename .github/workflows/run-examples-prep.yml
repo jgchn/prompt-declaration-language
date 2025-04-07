@@ -32,10 +32,30 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
       if: ${{ steps.changed-pdl-files.outputs.all_changed_files_count > 0 }}
+      
+    - name: Check if update results automatically by GitHub Actions Bot 
+      id: parse-run-examples-config
+      run: |
+        value=$(yq '.update_results' config.yaml | tr '[:upper:]' '[:lower:]')
+        echo "value=$value"
+        echo "update_results=$value" >> $GITHUB_OUTPUT
+      # Install yq if needed
+      shell: bash
+      
+    # Define a lock if update results 
+    - name: Lock job for updating results 
+      uses: softprops/turnstyle@v2
+      if: ${{ steps.parse-run-examples-config.outputs.update_results == 'true' }}
+      with:
+        poll-interval-seconds: 5
+      
     - uses: ./.github/actions/run-examples
       if: ${{ steps.changed-pdl-files.outputs.all_changed_files_count > 0 }}
       with:
         python-version: ${{ matrix.python-version }}
         runner-os: ${{ runner.os }}
+        update-results: ${{ steps.parse-run-examples-config.outputs.update_results }}
         check: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
         head-ref: ${{ github.head_ref }}
+        github-actor-id: ${{ github.actor_id }}
+        github-actor: ${{ github.actor }}

@@ -1,5 +1,5 @@
 # Configuration file for test_examples_run.py
-update_results: False
+update_results: True
 
 # A subset of files to check, useful for local dev
 # If empty, check all files
