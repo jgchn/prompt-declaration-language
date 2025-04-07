@@ -82,18 +82,6 @@ runs:
         py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings || true
         echo "TEST_EXIT_CODE=$?" >> $GITHUB_ENV
     
-    # Commit the results if update results
-    - name: Push new results to branch
-      shell: bash
-      if: ${{ inputs.update-results == 'true' }}
-      run: |
-        git config --local user.name github-actions[bot]
-        git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        git status
-        git add tests/results/
-        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
-        git push
- 
     # Patch config with update_results to false
     - name: Patch tests/test_examples_run.yaml with update_results to False
       if: ${{ inputs.update-results == 'true' }}
@@ -107,6 +95,19 @@ runs:
           }
         commitChange: true
     
+    # Commit the results if update results
+    - name: Push new results to branch
+      shell: bash
+      if: ${{ inputs.update-results == 'true' }}
+      run: |
+        git config --local user.name github-actions[bot]
+        git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+        git status
+        git pull
+        git add tests/results/
+        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
+        git push
+ 
     - name: Check if pytest passed
       shell: bash
       run: |
