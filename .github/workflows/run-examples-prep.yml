@@ -42,7 +42,7 @@ jobs:
       # Install yq if needed
       shell: bash
       
-    # Define a lock if update results 
+    # Define a lock if update results to prevent matrix updating results at once
     - name: Lock job for updating results 
       uses: softprops/turnstyle@v2
       if: ${{ steps.parse-run-examples-config.outputs.update_results == 'true' }}
