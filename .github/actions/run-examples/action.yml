@@ -85,8 +85,10 @@ runs:
       shell: bash
       run: |
         cat tests/test_examples_run.yaml
+        set +e  # Allow pytest to fail without exiting the shell
         py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings || true
-        echo "TEST_EXIT_CODE=$?" >> $GITHUB_ENV
+        TEST_EXIT_CODE=$?  # Capture the exit code after pytest
+        echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV  # Save exit code for later
     
     # Patch config with update_results to false
     - name: Patch tests/test_examples_run.yaml with update_results to False
