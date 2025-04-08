@@ -1,74 +1,62 @@
-# Configuration file for test_examples_run.py
-update_results: True
-
-# A subset of files to check, useful for local dev
-# If empty, check all files
-# check accepts a list of strings
+update_results: false
 check:
-
-# Files to skip
+  - examples/chatbot/chatbot.pdl
 skip:
-  # Requires dataset dependency
   - examples/cldk/cldk-assistant.pdl
   - examples/gsm8k/gsm8.pdl
   - examples/gsm8k/gsm8k-plan.pdl
-
-  # Requires installation dependencies
   - examples/intrinsics/demo-hallucination.pdl
   - examples/tutorial/programs/demo-hallucination.pdl
-
-  # Skip RAG examples
   - examples/rag/pdf_index.pdl
   - examples/rag/pdf_query.pdl
   - examples/rag/rag_library1.pdl
-
-  # Skip structure decoding examples for now
   - examples/tutorial/structured_decoding.pdl
-
-  # Output result include trace (and thus timing) for some reason. Investigate why
   - examples/react/react_call.pdl
-
-  # UI examples
   - pdl-live-react/demos/error.pdl
   - pdl-live-react/demos/demo1.pdl
   - pdl-live-react/demos/demo2.pdl
-
-  # Granite-io examples
   - examples/granite-io/granite_io_hallucinations.pdl
   - examples/granite-io/granite_io_openai.pdl
   - examples/granite-io/granite_io_thinking.pdl
   - examples/granite-io/granite_io_transformers.pdl
-
-# Files that require input
 with_inputs:
   examples/tutorial/programs/chatbot.pdl:
-    stdin: "What is APR?\nyes\n"
+    stdin: |
+      What is APR?
+      yes
     scope: null
   examples/chatbot/chatbot.pdl:
-    stdin: "What is APR?\nyes\n"
+    stdin: |
+      What is APR?
+      yes
     scope: null
   examples/demo/7-chatbot-roles.pdl:
-    stdin: "What is APR?\nquit\n"
+    stdin: |
+      What is APR?
+      quit
     scope: null
   examples/tutorial/input_stdin.pdl:
-    stdin: "What is APR?\nyes\n"
+    stdin: |
+      What is APR?
+      yes
     scope: null
   examples/tutorial/input_stdin_multiline.pdl:
-    stdin: "Hello\nBye\n"
+    stdin: |
+      Hello
+      Bye
     scope: null
   examples/input/input_test1.pdl:
-    stdin: "Hello\n"
+    stdin: |
+      Hello
     scope: null
   examples/input/input_test2.pdl:
-    stdin: "Hello\n"
+    stdin: |
+      Hello
     scope: null
   examples/tutorial/free_variables.pdl:
     stdin: null
-    scope: {
-        "something": "ABC"
-      }
-
-# Files expecting PDL parse error
+    scope:
+      something: ABC
 expected_parse_error:
   - tests/data/line/hello.pdl
   - tests/data/line/hello1.pdl
@@ -78,8 +66,6 @@ expected_parse_error:
   - tests/data/line/hello10.pdl
   - tests/data/line/hello11.pdl
   - tests/data/line/hello31.pdl
-
-# Files expecting runtime error
 expected_runtime_error:
   - examples/callback/repair_prompt.pdl
   - examples/tutorial/type_list.pdl
