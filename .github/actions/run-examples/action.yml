@@ -105,7 +105,7 @@ runs:
         createPR: false
         branch: ${{ inputs.head-ref }}
         masterBranchName: ${{ inputs.head-ref }}
-        messge: "Reverting update_results to False. If you wish to update again, change locally and push with change."
+        message: "Reverting update_results to False. If you wish to update again, change locally and push with change."
         token: ${{ inputs.github-token }}
         repository: ${{ inputs.github-repository }}
         commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
