@@ -30,6 +30,8 @@ inputs:
   head-ref:
     description: 'Head ref of the repo'
     required: true
+  last-job: 
+    description: 'True if this is the last matrix job, required sequential execution for writing results'
 runs:
   using: 'composite'
   steps:
@@ -90,26 +92,6 @@ runs:
         TEST_EXIT_CODE=$?  # Capture the exit code after pytest
         echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV  # Save exit code for later
     
-    # Patch config with update_results to false
-    - name: Patch tests/test_examples_run.yaml with update_results to False
-      if: ${{ inputs.update-results == 'true' }}
-      uses: fjogeleit/yaml-update-action@main
-      with:
-        changes: |
-          {
-            "tests/test_examples_run.yaml": {
-                "update_results": false
-              }
-          }
-        commitChange: true
-        createPR: false
-        branch: ${{ inputs.head-ref }}
-        masterBranchName: ${{ inputs.head-ref }}
-        message: "Reverting update_results to False. If you wish to update again, change locally and push with change."
-        token: ${{ inputs.github-token }}
-        repository: ${{ inputs.github-repository }}
-        commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
-    
     # Commit the results if update results
     - name: Push new results to branch
       shell: bash
@@ -119,9 +101,42 @@ runs:
         git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
         git status
         git pull
+        # git add tests/test_examples_run.yaml
         git add tests/results/
         git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
         git push
+      
+    # Patch config with update_results to false
+    - name: Patch tests/test_examples_run.yaml with update_results to False, only for the last matrix version
+      if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
+      uses: fjogeleit/yaml-update-action@main
+      with:
+        changes: |
+          {
+            "tests/test_examples_run.yaml": {
+                "update_results": false
+              }
+          }
+        commitChange: false
+        # createPR: false
+        # branch: ${{ inputs.head-ref }}
+        # masterBranchName: ${{ inputs.head-ref }}
+        # message: "Reverting update_results to False. If you wish to update again, change locally and push with change."
+        # token: ${{ inputs.github-token }}
+        # repository: ${{ inputs.github-repository }}
+        # commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
+    - name: Commit changes to run-examples config 
+      if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
+      shell: bash
+      run: |
+        git config --local user.name github-actions[bot]
+        git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+        git status
+        git pull
+        git add tests/test_examples_run.yaml
+        git diff --cached --quiet || git commit -s -m "Reverting update_results to False."
+        git push
+    # - name: 
     # - name: Push new results to branch
     #   shell: bash
     #   if: ${{ inputs.update-results == 'true' }}

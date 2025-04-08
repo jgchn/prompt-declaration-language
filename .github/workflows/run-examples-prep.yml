@@ -64,4 +64,5 @@ jobs:
         github-actor: ${{ github.actor }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
         github-repository: ${{ github.repository }}
+        last-job: ${{ matrix.python-version == '3.13' && steps.parse-run-examples-config.outputs.update_results == 'true' }}
         
