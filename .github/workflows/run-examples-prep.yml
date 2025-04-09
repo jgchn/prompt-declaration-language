@@ -1,0 +1,68 @@
+---
+name: Run examples on modified PDL files
+on: [push, pull_request]
+jobs:
+  tests:
+    name: Execution tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        python-version: ['3.11', '3.12', '3.13']
+    steps:
+    # Detect modified PDL files, includes Add, Modified, but not Deleted
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Detect all PDL files that were changed or added
+      id: changed-pdl-files
+      uses: tj-actions/changed-files@6cb76d07bee4c9772c6882c06c37837bf82a04d3 # v46
+      with:
+        files: |
+          **.pdl
+        json: "true"
+        escape_json: "false"
+    - name: List PDL files that were modified or added and append to test_examples_run
+      env:
+        MODIFIED_PDL_FILES: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+      run: echo "$MODIFIED_PDL_FILES"
+
+    # Run tests if there are modified PDL files
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+      if: ${{ steps.changed-pdl-files.outputs.all_changed_files_count > 0 }}
+      
+    - name: Check if update results automatically by GitHub Actions Bot 
+      id: parse-run-examples-config
+      run: |
+        value=$(yq '.update_results' tests/test_examples_run.yaml | tr '[:upper:]' '[:lower:]')
+        echo "value=$value"
+        echo "update_results=$value" >> $GITHUB_OUTPUT
+      # Install yq if needed
+      shell: bash
+      
+    # # Define a lock if update results to prevent matrix updating results at once
+    # - name: Lock job for updating results 
+    #   uses: softprops/turnstyle@v2
+    #   if: ${{ steps.parse-run-examples-config.outputs.update_results == 'true' }}
+    #   with:
+    #     poll-interval-seconds: 5
+      
+    - uses: ./.github/actions/run-examples
+      if: ${{ steps.changed-pdl-files.outputs.all_changed_files_count > 0 }}
+      with:
+        python-version: ${{ matrix.python-version }}
+        runner-os: ${{ runner.os }}
+        update-results: ${{ steps.parse-run-examples-config.outputs.update_results }}
+        check: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
+        head-ref: ${{ github.head_ref }}
+        github-actor-id: ${{ github.actor_id }}
+        github-actor: ${{ github.actor }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-repository: ${{ github.repository }}
+        last-job: ${{ matrix.python-version == '3.13' && steps.parse-run-examples-config.outputs.update_results == 'true' }}
+        
