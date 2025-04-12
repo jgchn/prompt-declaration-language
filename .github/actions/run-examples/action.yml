@@ -167,3 +167,23 @@ runs:
       shell: bash
       run: |
         echo $TEST_RESULT
+        
+    - name: Detect results files that were added 
+      id: added-result-files 
+      uses: tj-actions/changed-files@6cb76d07bee4c9772c6882c06c37837bf82a04d3 # v46
+      with:
+        files: |
+          **.result
+        json: "true"
+        escape_json: "false"
+    
+    - name: Return the results in output 
+      id: output-results
+      shell: bash 
+      env: 
+        ADDED_RESULT_FILES: ${{ steps.added-result-files.outputs.all_changed_files }}
+      run: |
+        for file in ${ADDED_RESULT_FILES}; do
+          cat $file
+        done
+        
