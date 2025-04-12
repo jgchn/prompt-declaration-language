@@ -138,7 +138,8 @@ class ExamplesRun:
 
             # Update files to check iff check is specified
             if content["check"] is not None:
-                self.check = content["check"]
+                if len(content["check"]) > 0:
+                    self.check = content["check"]
 
             self.skip = content["skip"]
             self.expected_parse_error = content["expected_parse_error"]
