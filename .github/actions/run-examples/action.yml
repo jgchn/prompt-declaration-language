@@ -17,7 +17,7 @@ inputs:
   check:
     description: 'Files to patch tests/test_examples_run.yaml with. These are the PDL files that the test will run against. Defaults to all PDL files.'
     required: false
-    default: ''
+    default: '[]'
 runs:
   using: 'composite'
   steps:
