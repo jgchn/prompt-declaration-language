@@ -87,7 +87,7 @@ jobs:
         git status
         git pull
         git add tests/test_examples_run.yaml
-        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Reverting update_result to false"
+        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Run examples: reverting update_result to false on your behalf"
         git push
       
       
