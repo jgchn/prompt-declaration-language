@@ -8,29 +8,16 @@ inputs:
   runner-os:
     description: 'Runner OS'
     required: true
-  update-results:
-    description: 'Whether to update the results for this run. Must be False for nightly runs'
+  head-ref:
+    description: 'Head ref of the repo'
     required: true
-  github-actor-id:
-    description: 'Github actor ID if commit changes'
-    required: false
-  github-actor:
-    description: 'Github actor if commit changes'
-    required: false
-  github-token:
-    description: 'Github token for commits and push'
-    required: false
-  github-repository:
-    description: 'Github repository'
-    required: false
+  update-results:
+    description: 'Whether to update the results for this run. Must be false for nightly runs'
+    required: true
   check:
     description: 'Files to patch tests/test_examples_run.yaml with. These are the PDL files that the test will run against. Defaults to all PDL files.'
     required: false
     default: ''
-  head-ref:
-    description: 'Head ref of the repo'
-    required: true
-
 runs:
   using: 'composite'
   steps:
@@ -43,7 +30,6 @@ runs:
         ref: ${{ inputs.head-ref }}
         fetch-depth: 0                        # Full history needed for fetch/rebase
     - name: Patch tests/test_examples_run.yaml check with modified files
-      if: ${{ inputs.check != '' }}
       uses: fjogeleit/yaml-update-action@main
       with:
         changes: |

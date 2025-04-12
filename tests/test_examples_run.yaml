@@ -1,6 +1,5 @@
 update_results: false
 check:
-  - examples/chatbot/chatbot.pdl
 skip:
   - examples/cldk/cldk-assistant.pdl
   - examples/gsm8k/gsm8.pdl

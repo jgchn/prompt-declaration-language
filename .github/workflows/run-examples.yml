@@ -24,3 +24,4 @@ jobs:
           runner-os: ${{ runner.os }}
           head-ref: ${{ github.head_ref }}
           update-results: 'false'
+          check: ''   # Empty string means run against all PDL programs

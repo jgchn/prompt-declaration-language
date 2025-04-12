@@ -54,12 +54,7 @@ jobs:
         update-results: ${{ steps.parse-run-examples-config.outputs.update_results }}
         check: ${{ steps.changed-pdl-files.outputs.all_changed_files }}
         head-ref: ${{ github.head_ref }}
-        github-actor-id: ${{ github.actor_id }}
-        github-actor: ${{ github.actor }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        github-repository: ${{ github.repository }}
-        last-job: ${{ matrix.python-version == '3.13' && steps.parse-run-examples-config.outputs.update_results == 'true' }}
-        
+
     # Patch config with update_results to false
     # Fetch the latest branch
     - uses: actions/checkout@v4
