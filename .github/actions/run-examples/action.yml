@@ -32,6 +32,13 @@ inputs:
     required: true
   last-job: 
     description: 'True if this is the last matrix job, required sequential execution for writing results'
+    required: false 
+    default: 'false' 
+# outputs:
+#   new-results-json: 
+#     description: "A JSON output of the new results to push, maps filename to file content"
+#     value: 
+    
 runs:
   using: 'composite'
   steps:
@@ -78,46 +85,48 @@ runs:
     - name: Pip list packages
       shell: bash
       run: pip list
-    - name: Show pip dependencies
-      shell: bash
-      run: |
-        pip install pipdeptree
-        pipdeptree -fl
+    # - name: Show pip dependencies
+    #   shell: bash
+    #   run: |
+    #     pip install pipdeptree
+    #     pipdeptree -fl
     - name: Run tests
       shell: bash
       run: |
         cat tests/test_examples_run.yaml
-        set +e  # Allow pytest to fail without exiting the shell
         py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings || true
-        TEST_EXIT_CODE=$?  # Capture the exit code after pytest
-        echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV  # Save exit code for later
+        if [ $? -eq 0 ]; then
+          echo "TEST_RESULT=PASSED" >> $GITHUB_ENV
+        else
+          echo "TEST_RESULT=FAILED" >> $GITHUB_ENV
+        fi
     
-    # Commit the results if update results
-    - name: Push new results to branch
-      shell: bash
-      if: ${{ inputs.update-results == 'true' }}
-      run: |
-        git config --local user.name github-actions[bot]
-        git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
-        git status
-        git pull
-        # git add tests/test_examples_run.yaml
-        git add tests/results/
-        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
-        git push
+    # # Commit the results if update results
+    # - name: Push new results to branch
+    #   shell: bash
+    #   if: ${{ inputs.update-results == 'true' }}
+    #   run: |
+    #     git config --local user.name github-actions[bot]
+    #     git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+    #     git status
+    #     git pull
+    #     # git add tests/test_examples_run.yaml
+    #     git add tests/results/
+    #     git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
+    #     git push
       
-    # Patch config with update_results to false
-    - name: Patch tests/test_examples_run.yaml with update_results to False, only for the last matrix version
-      if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
-      uses: fjogeleit/yaml-update-action@main
-      with:
-        changes: |
-          {
-            "tests/test_examples_run.yaml": {
-                "update_results": false
-              }
-          }
-        commitChange: false
+    # # Patch config with update_results to false
+    # - name: Patch tests/test_examples_run.yaml with update_results to False, only for the last matrix version
+    #   if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
+    #   uses: fjogeleit/yaml-update-action@main
+    #   with:
+    #     changes: |
+    #       {
+    #         "tests/test_examples_run.yaml": {
+    #             "update_results": false
+    #           }
+    #       }
+    #     commitChange: false
         # createPR: false
         # branch: ${{ inputs.head-ref }}
         # masterBranchName: ${{ inputs.head-ref }}
@@ -125,17 +134,17 @@ runs:
         # token: ${{ inputs.github-token }}
         # repository: ${{ inputs.github-repository }}
         # commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
-    - name: Commit changes to run-examples config 
-      if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
-      shell: bash
-      run: |
-        git config --local user.name github-actions[bot]
-        git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
-        git status
-        git pull
-        git add tests/test_examples_run.yaml
-        git diff --cached --quiet || git commit -s -m "Reverting update_results to False."
-        git push
+    # - name: Commit changes to run-examples config 
+    #   if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
+    #   shell: bash
+    #   run: |
+    #     git config --local user.name github-actions[bot]
+    #     git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+    #     git status
+    #     git pull
+    #     git add tests/test_examples_run.yaml
+    #     git diff --cached --quiet || git commit -s -m "Reverting update_results to False."
+    #     git push
     # - name: 
     # - name: Push new results to branch
     #   shell: bash
@@ -152,7 +161,7 @@ runs:
     - name: Check if pytest passed
       shell: bash
       run: |
-        if [ "$TEST_EXIT_CODE" -ne 0 ]; then
+        if [ "$TEST_RESULT" -ne 0 ]; then
           echo "❌ Pytest failed, check for output."
-          exit $TEST_EXIT_CODE
+          exit $TEST_RESULT
         fi
