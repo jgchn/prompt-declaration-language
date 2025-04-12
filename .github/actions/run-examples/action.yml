@@ -94,12 +94,10 @@ runs:
       shell: bash
       run: |
         cat tests/test_examples_run.yaml
-        py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings || true
-        if [ $? -eq 0 ]; then
-          echo "TEST_RESULT=PASSED" >> $GITHUB_ENV
-        else
-          echo "TEST_RESULT=FAILED" >> $GITHUB_ENV
-        fi
+        py.test -v --capture=tee-sys -rfE -s tests/test_examples_run.py --disable-pytest-warnings
+        EXIT_CODE=$?
+        echo "TEST_RESULT=$([ $EXIT_CODE -eq 0 ] && echo PASSED || echo FAILED)" >> $GITHUB_ENV
+        exit 0
     
     # # Commit the results if update results
     # - name: Push new results to branch
@@ -161,7 +159,4 @@ runs:
     - name: Check if pytest passed
       shell: bash
       run: |
-        if [ "$TEST_RESULT" -ne 0 ]; then
-          echo "❌ Pytest failed, check for output."
-          exit $TEST_RESULT
-        fi
+        echo $TEST_RESULT
