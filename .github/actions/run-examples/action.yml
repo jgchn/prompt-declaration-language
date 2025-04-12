@@ -35,8 +35,8 @@ inputs:
     required: false 
     default: 'false' 
 # outputs:
-#   new-results-json: 
-#     description: "A JSON output of the new results to push, maps filename to file content"
+#   pass-or-fail:
+#     description: 'True if this run passes and False otherwise'
 #     value: 
     
 runs:
@@ -49,7 +49,8 @@ runs:
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.head-ref }}
-    - name: Patch tests/test_examples_run.yaml with modified files
+        fetch-depth: 0                # Full history needed for fetch/rebase
+    - name: Patch tests/test_examples_run.yaml check with modified files
       if: ${{ inputs.check != '' }}
       uses: fjogeleit/yaml-update-action@main
       with:
@@ -106,21 +107,20 @@ runs:
           fi
         )
     
-    # # Commit the results if update results
-    # - name: Push new results to branch
-    #   shell: bash
-    #   if: ${{ inputs.update-results == 'true' }}
-    #   run: |
-    #     git config --local user.name github-actions[bot]
-    #     git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
-    #     git status
-    #     git pull
-    #     # git add tests/test_examples_run.yaml
-    #     git add tests/results/
-    #     git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples on $(date)"
-    #     git push
+    # Commit the results if update results
+    - name: Push new results to branch
+      shell: bash
+      if: ${{ inputs.update-results == 'true' }}
+      run: |
+        git config --local user.name github-actions[bot]
+        git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+        git status
+        git pull
+        git add tests/results/
+        git diff --cached --quiet || git commit -s -m "github-actions[bot]: Updated results file when running examples"
+        git push
       
-    # # Patch config with update_results to false
+    # Patch config with update_results to false
     # - name: Patch tests/test_examples_run.yaml with update_results to False, only for the last matrix version
     #   if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
     #   uses: fjogeleit/yaml-update-action@main
@@ -132,13 +132,13 @@ runs:
     #           }
     #       }
     #     commitChange: false
-        # createPR: false
-        # branch: ${{ inputs.head-ref }}
-        # masterBranchName: ${{ inputs.head-ref }}
-        # message: "Reverting update_results to False. If you wish to update again, change locally and push with change."
-        # token: ${{ inputs.github-token }}
-        # repository: ${{ inputs.github-repository }}
-        # commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
+    #     createPR: false
+    #     branch: ${{ inputs.head-ref }}
+    #     masterBranchName: ${{ inputs.head-ref }}
+    #     message: "Reverting update_results to False. If you wish to update again, change locally and push with change."
+    #     token: ${{ inputs.github-token }}
+    #     repository: ${{ inputs.github-repository }}
+    #     commitUserEmail: ${{ inputs.github-actor-id }}+github-actions[bot]${{ inputs.github-actor }}@users.noreply.github.com
     # - name: Commit changes to run-examples config 
     #   if: ${{ inputs.update-results == 'true' && inputs.last-job == 'true' }}
     #   shell: bash
@@ -150,7 +150,7 @@ runs:
     #     git add tests/test_examples_run.yaml
     #     git diff --cached --quiet || git commit -s -m "Reverting update_results to False."
     #     git push
-    # - name: 
+
     # - name: Push new results to branch
     #   shell: bash
     #   if: ${{ inputs.update-results == 'true' }}
@@ -166,24 +166,8 @@ runs:
     - name: Check if pytest passed
       shell: bash
       run: |
-        echo $TEST_RESULT
-        
-    - name: Detect results files that were added 
-      id: added-result-files 
-      uses: tj-actions/changed-files@6cb76d07bee4c9772c6882c06c37837bf82a04d3 # v46
-      with:
-        files: |
-          **.result
-        json: "true"
-        escape_json: "false"
-    
-    - name: Return the results in output 
-      id: output-results
-      shell: bash 
-      env: 
-        ADDED_RESULT_FILES: ${{ steps.added-result-files.outputs.all_changed_files }}
-      run: |
-        for file in ${ADDED_RESULT_FILES}; do
-          cat $file
-        done
-        
+        if [ "$TEST_RESULT" == "PASSED" ]; then
+          exit 0
+        else
+            exit 1
+        fi
