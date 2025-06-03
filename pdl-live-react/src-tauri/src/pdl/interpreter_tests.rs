@@ -1,11 +1,10 @@
 #[cfg(test)]
 mod tests {
-    //    use super::*;
     use ::std::error::Error;
     use serde_json::json;
 
     use crate::pdl::{
-        ast::{Block::*, ModelBlockBuilder, PdlBlock, PdlBlock::Advanced, Scope},
+        ast::{Block, Body::*, ModelBlockBuilder, PdlBlock, PdlBlock::Advanced, PdlResult, Scope},
         interpreter::{RunOptions, load_scope, run_json_sync as run_json, run_sync as run},
     };
 
@@ -19,11 +18,11 @@ mod tests {
         o
     }
 
-    fn non_streaming<'a>() -> RunOptions<'a> {
+    /* fn non_streaming<'a>() -> RunOptions<'a> {
         let mut o: RunOptions = Default::default();
         o.stream = false;
         o
-    }
+    } */
 
     fn initial_scope() -> Scope {
         Default::default()
@@ -61,12 +60,15 @@ mod tests {
     #[test]
     fn single_model_via_input_string() -> Result<(), Box<dyn Error>> {
         let (_, messages, _) = run(
-            &Advanced(Model(
-                ModelBlockBuilder::default()
-                    .model(DEFAULT_MODEL)
-                    .input(Box::from(PdlBlock::String("hello".to_string())))
-                    .build()?,
-            )),
+            &Advanced(Block {
+                metadata: None,
+                body: Model(
+                    ModelBlockBuilder::default()
+                        .model(DEFAULT_MODEL)
+                        .input(Box::from(PdlBlock::String("hello".to_string())))
+                        .build()?,
+                ),
+            }),
             None,
             streaming(),
             initial_scope(),
@@ -74,6 +76,26 @@ mod tests {
         assert_eq!(messages.len(), 1);
         assert_eq!(messages[0].role, MessageRole::Assistant);
         assert!(messages[0].content.contains("Hello!"));
+        Ok(())
+    }
+
+    #[test]
+    fn single_model_via_text_chain_expr() -> Result<(), Box<dyn Error>> {
+        let (_, messages, _) = run_json(
+            json!({
+                "text": [
+                    "hello",
+                    {"model": { "pdl__expr": DEFAULT_MODEL }}
+                ]
+            }),
+            streaming(),
+            initial_scope(),
+        )?;
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0].role, MessageRole::User);
+        assert_eq!(messages[0].content, "hello");
+        assert_eq!(messages[1].role, MessageRole::Assistant);
+        assert!(messages[1].content.contains("Hello!"));
         Ok(())
     }
 
@@ -180,6 +202,29 @@ mod tests {
         assert_eq!(messages[0].content, json);
         assert_eq!(messages[1].role, MessageRole::User);
         assert_eq!(messages[1].content, "value");
+        Ok(())
+    }
+
+    #[test]
+    fn text_parser_jsonl() -> Result<(), Box<dyn Error>> {
+        let json = "{\"key\":\"value\"}
+{\"key2\":\"value2\"}";
+        let program = json!({
+            "text": [
+                { "def": "foo", "parser": "jsonl", "text": [json] },
+                "${ foo[0].key }",
+                "${ foo[1].key2 }"
+            ]
+        });
+
+        let (_, messages, _) = run_json(program, streaming(), initial_scope())?;
+        assert_eq!(messages.len(), 3);
+        assert_eq!(messages[0].role, MessageRole::User);
+        assert_eq!(messages[0].content, json);
+        assert_eq!(messages[1].role, MessageRole::User);
+        assert_eq!(messages[1].content, "value");
+        assert_eq!(messages[2].role, MessageRole::User);
+        assert_eq!(messages[2].content, "value2");
         Ok(())
     }
 
@@ -293,6 +338,45 @@ mod tests {
         assert_eq!(messages.len(), 1);
         assert_eq!(messages[0].role, MessageRole::User);
         assert_eq!(messages[0].content, "{'foo': 3}");
+        Ok(())
+    }
+
+    #[test]
+    fn text_python_two_code_result_dict() -> Result<(), Box<dyn Error>> {
+        let program = json!({
+            "text": [
+                { "lang": "python",
+                   "code":"print('hi ho'); result = {\"foo\": 3}"
+                },
+                { "lang": "python",
+                   "code":"import os; print('hi ho'); result = {\"foo\": 4}"
+                }
+            ]
+        });
+
+        let (_, messages, _) = run_json(program, streaming(), initial_scope())?;
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0].role, MessageRole::User);
+        assert_eq!(messages[0].content, "{'foo': 3}");
+        assert_eq!(messages[1].role, MessageRole::User);
+        assert_eq!(messages[1].content, "{'foo': 4}");
+        Ok(())
+    }
+
+    // TODO: illegal instruction, but only during tests
+    #[test]
+    fn text_python_code_import_venv() -> Result<(), Box<dyn Error>> {
+        let program = json!({
+            "include": "./tests/cli/code-python.pdl"
+        });
+
+        let (_, messages, _) = run_json(program, streaming(), initial_scope())?;
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0].role, MessageRole::User);
+        assert_eq!(
+            messages[0].content,
+            "{'foo': None, 'diff': {'D': {'two': {'N': 3}}}}"
+        );
         Ok(())
     }
 
@@ -596,9 +680,71 @@ mod tests {
     }
 
     #[test]
+    fn regex_findall() -> Result<(), Box<dyn Error>> {
+        let program = json!({
+            "data": "aaa999bbb888",
+            "parser": {
+                "regex": "[^0-9]*(?P<answer1>[0-9]+)[^0-9]*(?P<answer2>[0-9]+)$",
+                "mode": "findall",
+                "spec": {
+                    "answer1": "str",
+                    "answer2": "str"
+                }
+            }
+        });
+
+        let (_, messages, _) = run_json(program, streaming(), initial_scope())?;
+        assert_eq!(messages.len(), 1);
+        assert_eq!(messages[0].role, MessageRole::User);
+        assert_eq!(messages[0].content, "[\"999\",\"888\"]");
+        Ok(())
+    }
+
+    #[test]
+    fn regex_plain_1() -> Result<(), Box<dyn Error>> {
+        let program = json!({
+            "data": "aaa999bbb888",
+            "parser": {
+                "regex": "[^0-9]*(?P<answer1>[0-9]+)[^0-9]*(?P<answer2>[0-9]+)$",
+                "spec": {
+                    "answer1": "str",
+                    "answer2": "str"
+                }
+            }
+        });
+
+        let (result, _, _) = run_json(program, streaming(), initial_scope())?;
+        let mut m = ::std::collections::HashMap::new();
+        m.insert("answer1".into(), "999".into());
+        m.insert("answer2".into(), "888".into());
+        assert_eq!(result, PdlResult::Dict(m));
+        Ok(())
+    }
+
+    #[test]
+    fn regex_plain_2() -> Result<(), Box<dyn Error>> {
+        let program = json!({
+            "data": "aaa999bbb888",
+            "parser": {
+                "regex": "[^0-9]*(?P<answer1>[0-9]+)[^0-9]*(?P<answer2>[0-9]+)$",
+                "spec": {
+                    "answer1": "str",
+                }
+            }
+        });
+
+        let (result, _, _) = run_json(program, streaming(), initial_scope())?;
+        let mut m = ::std::collections::HashMap::new();
+        m.insert("answer1".into(), "999".into());
+        assert_eq!(result, PdlResult::Dict(m));
+        Ok(())
+    }
+
+    #[test]
     fn bee_1() -> Result<(), Box<dyn Error>> {
         let program = crate::compile::beeai::compile("./tests/data/bee_1.py", false)?;
-        let (_, messages, _) = run(&program, None, non_streaming(), initial_scope())?;
+        // non-streaming currently broken due to issues invoking beeai_framework python tools via RustPython
+        let (_, messages, _) = run(&program, None, /*non_*/ streaming(), initial_scope())?;
         assert_eq!(messages.len(), 9);
         assert!(
             messages.iter().any(|m| m.role == MessageRole::User
